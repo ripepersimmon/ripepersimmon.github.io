@@ -4,7 +4,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "ripepersimmon.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Author
-author-name:    SaHong Park
+author-name:    Sa Hong Park
 author-image:   1.jpg
 author-job:     Student / Sophomore
 author-email:   justin4396@naver.com # Add your email for contant form.

@@ -55,10 +55,3 @@ def get_song(song_url: str):
         print("오류 발생:", e)
         return None
     
-song_info = get_song("https://www.melon.com/song/detail.htm?songId=33367293")
-if song_info:
-    print("제목:", song_info["title"])
-    print("아티스트:", song_info["artist"])
-    print("앨범:", song_info["album"])
-    print("발매일:", song_info["release_date"])
-    print("가사:\n", song_info["lyrics"])

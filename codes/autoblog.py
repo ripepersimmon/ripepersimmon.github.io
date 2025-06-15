@@ -36,7 +36,11 @@ categories: sheet music
 ### 가사
 {formatted_lyrics}
 
+
 ## 다운로드
+
+{{% include adsense.html %}}
+
 {download_button}
 
 ## 작성자 

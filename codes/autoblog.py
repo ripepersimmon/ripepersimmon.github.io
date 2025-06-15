@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from melon import get_song
 
@@ -9,13 +10,10 @@ def make_markdown(melon_url, youtube_url: str, filename: str, instrument: str):
     album = song_info["album"]
     release_date = song_info["release_date"]
     
-    # 줄바꿈을 마크다운 형식으로 반영
     lyrics_lines = song_info["lyrics"].split("\n")
     formatted_lyrics = "\n".join([line.strip() + "  " for line in lyrics_lines if line.strip()])
 
-    # 포스트 제목 포맷 변경
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
-
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
 
@@ -57,11 +55,12 @@ instrument = input("악기 파트를 입력하세요 (예: Piano, Violin): ").st
 # 곡 정보 가져오기
 song_info = get_song(melon_url)
 
-# 날짜 포함된 파일명 생성
+# 날짜 포함된 파일명 생성 (불가 문자 제거 포함)
 today = datetime.now().strftime("%Y-%m-%d")
-safe_title = song_info['title'].replace(" ", "_")
-safe_instrument = instrument.replace(" ", "_")
-output_filename = f"{today}-{safe_title}_{safe_instrument}_악보_pdf_다운로드.md"
+raw_title = f"{today}-{song_info['title']}_{instrument}_악보_pdf_다운로드.md"
+
+# Windows에서 사용할 수 없는 문자 제거
+output_filename = re.sub(r'[<>:"/\\|?*]', '', raw_title)
 
 # 마크다운 생성
 markdown_content = make_markdown(melon_url, youtube_url, filename, instrument)

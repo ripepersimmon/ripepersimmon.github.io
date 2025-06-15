@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Light Chaser
+title: Light Chaser 드럼 악보 PDF 다운로드
 date: 2025-06-15 18:51:36 +0900
 categories: sheet music
 ---
@@ -49,7 +49,7 @@ Climb climb climb climb climb
 Run run run run run
 Climb climb climb climb climb
 ## 다운로드
-<p><a href="r"C:\Users\justi\OneDrive - 한국외국어대학교\악보\밴드 스코어\Light Chaser-드럼_키트.pdf"" download><strong>📥 Download Sheet Music</strong></a></p>
+
 ## 작성자 
 - **작성자**: autoblog made by sahong
 - **작성일**: 2025-06-15 18:51:36 +0900

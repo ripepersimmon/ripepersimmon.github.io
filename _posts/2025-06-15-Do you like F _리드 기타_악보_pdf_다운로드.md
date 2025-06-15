@@ -5,7 +5,7 @@ date: 2025-06-15 21:07:37 +0900
 categories: sheet music
 ---
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/tHMfv6Svv94" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/watch?v=tHMfv6Svv94" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Do you like F ? - Bump2Soul
 

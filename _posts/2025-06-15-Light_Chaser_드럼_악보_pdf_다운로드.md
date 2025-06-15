@@ -50,7 +50,7 @@ Run run run run run
 Climb climb climb climb climb  
 
 ## 다운로드
-<p><a href="https://hufs365-my.sharepoint.com/:b:/g/personal/justin4396_o365_hufs_ac_kr/EXRu9ZZYnHZJkn6_k1Cb9v8BwlAy12F0TzjH51cxidmagg?e=fWQ46d" download><strong>📥 Download Sheet Music</strong></a></p>
+<p><a href="https://drive.google.com/file/d/1LS1JwuwYxWRKsvkVYTjH6X9PKUPuXEfZ/view?usp=sharing" download><strong>📥 Download Sheet Music</strong></a></p>
 
 ## 작성자 
 - **작성자**: autoblog.bot made by sahong

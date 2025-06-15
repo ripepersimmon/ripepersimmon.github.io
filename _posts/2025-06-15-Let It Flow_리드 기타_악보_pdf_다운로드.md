@@ -5,7 +5,7 @@ date: 2025-06-15 22:35:34 +0900
 categories: sheet music
 ---
 
-<iframe width="560" height="315" src="https://www.youtube.com/watch?v=T3zX2tOmZvA" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embedded/T3zX2tOmZvA" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Let It Flow - 양반들 (Yangbans)
 

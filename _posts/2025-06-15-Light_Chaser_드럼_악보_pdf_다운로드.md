@@ -49,6 +49,8 @@ Climb climb climb climb climb
 Run run run run run  
 Climb climb climb climb climb  
 
+{% include adsense.html %}
+
 ## 다운로드
 <p><a href="https://drive.google.com/file/d/1LS1JwuwYxWRKsvkVYTjH6X9PKUPuXEfZ/view?usp=sharing" download><strong>📥 Download Sheet Music</strong></a></p>
 

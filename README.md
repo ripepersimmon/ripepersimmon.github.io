@@ -1,52 +1,31 @@
-<h1>Flexton is an ultra-minimalist and responsive theme for Jekyll</h1>
+# ripepersimmon.github.io
 
-<p>Flexton created especially for those who appreciate minimalism and functionality.</p>
-<p>Amazing flexibility with pleasant colors and custom design makes Flexton a simple theme, suitable for almost any blog.</p>
+이 블로그는 악보, 음악, 그리고 코딩을 중심으로 한 개인 프로젝트 공간입니다.
 
-<h2>Demo</h2>
+## 소개
+- 다양한 음악 악보(기타, 드럼 등)와 음악 관련 자료를 공유합니다.
+- 자동화된 파이썬 스크립트로 블로그 포스트를 생성하고 관리합니다.
+- 개발, 데이터 처리, 자동화 등 코딩 관련 팁과 프로젝트도 함께 다룹니다.
 
-Check the theme in action [Demo](https://flexton.netlify.com/)
+## 주요 기능
+- Jekyll 기반의 미니멀리즘 블로그
+- 음악 악보 PDF 및 이미지 자료 업로드 및 공유
+- 자동 포스트 생성기(codes/autoblog.py 등)로 손쉬운 콘텐츠 관리
+- 카테고리/태그별 분류 및 검색 지원
+- 반응형 디자인 및 모바일 최적화
 
-![Page preview](https://github.com/artemsheludko/flexton/blob/master/images/preview.png?raw=true)
+## 사용법
+1. `_posts/` 폴더에 마크다운 포스트 추가 또는 자동 생성 스크립트 활용
+2. `codes/` 폴더 내 파이썬 스크립트로 자동 포스팅 가능
+3. 음악 악보는 `images/` 폴더에 업로드 후 포스트에서 참조
 
-<h2>Features</h2>
+## 개발 및 배포
+- 로컬에서 `bundle install` 후 `jekyll serve`로 미리보기 가능
+- GitHub Pages 등으로 손쉽게 배포
 
-<ul>
-	<li>100% responsive and clean theme</li>
- 	<li>Optimized for mobile devices</li>
-	<li>Valid HTML5 code</li>
-	<li>Included site search</li>
-	<li>Contact Page</li>
-	<li>Post sharing</li>
-	<li>Supports Mail Chimp Subscriber</li>
-	<li>Supports Disqus Comments</li>
-	<li>Social Media Profiles</li>
-	<li>Contact Form - FormsPree</li>
-	<li>Evil Icons</li>
-	<li>Google Fonts</li>
-</ul>
+## 라이선스
+- 본 블로그의 코드 및 자료는 별도 명시가 없는 한 MIT 라이선스를 따릅니다.
 
-<h2>Credits</h2>
+---
 
-<p>I have used the following scripts, fonts or other files as listed.</p>
-
-<ul>
-  <li><a href="https://fonts.google.com/">Google Fonts</a> (Volkhov, Open Sans).</li>
-  <li><a href="http://evil-icons.io/">Evil Icons</a></li>
-  <li><a href="http://fitvidsjs.com/">FitVids.js</a></li>
-  <li><a href="https://jquery.com/">jQuery.com</a></li>
-  <li><a href="https://github.com/christian-fei/Simple-Jekyll-Search">Simple-Jekyll-Search</a></li>
-  <li>Preview Images form <a href="https://unsplash.com/">unsplash.com</a>, <a href="https://www.pexels.com/">pexels.com</a></li>
-</ul>
-
-<h2>Deployment</h2>
-
-To run the theme locally, navigate to the theme directory and run `bundle install` to install the dependencies, then run `jekyll serve` or `bundle exec serve` to start the Jekyll server.
-
-I would recommend checking the [Deployment Methods](https://jekyllrb.com/docs/deployment-methods/) page on Jekyll website.
-
-<h2>Buy me a coffee</h2>
-
-<p>If you want to show your appreciation, buy me one <a href="https://www.buymeacoffee.com/artemsheludko" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a> ! Every five cups of coffee and a new theme for Jekyll is ready 😋</p>
-<p>Either way, your support is a way to thank me ❤️</p>
-<p align="center"><b>Thank you for your support!</b></p>
+음악과 코딩, 그리고 자동화에 관심 있는 분들과의 소통을 환영합니다!

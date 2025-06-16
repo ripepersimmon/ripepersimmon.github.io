@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Hyenoid-비공정_드럼 악보 PDF 다운로드
-date: 2025-06-16 15:26:31 +0900
-image: https://cdnimg.melon.co.kr/cm2/album/images/114/19/606/11419606_20240216120848_500.jpg?82da706124fe8ec93a67d996b13ee6a1/melon/resize/282/quality/80/optimize
+date: 2025-06-16 15:32:26 +0900
+image: Neom0541_비공정_album.jpg
 tags: [비공정, 드럼]
 categories: sheet
 ---
@@ -32,4 +32,4 @@ categories: sheet
 
 ## 작성자 
 - **작성자**: autoblog.bot made by sahong
-- **작성일**: 2025-06-16 15:26:31 +0900
+- **작성일**: 2025-06-16 15:32:26 +0900

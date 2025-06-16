@@ -61,26 +61,47 @@ GOOGLE_CX = os.getenv('GOOGLE_CX')
 #         logging.warning(f"Google API 정보 검색 실패: {e}")
 #         return '검색 결과를 찾을 수 없습니다.'
 
+def download_album_art(album_art_url, album, artist):
+    if not album_art_url:
+        return None
+    try:
+        # 파일명: <album>_<artist>_album.jpg (공백, 특수문자 제거)
+        safe_album = re.sub(r'[^\w\-]', '', album)
+        safe_artist = re.sub(r'[^\w\-]', '', artist)
+        filename = f"{safe_album}_{safe_artist}_album.jpg"
+        images_dir = os.path.join(os.path.dirname(__file__), '..', 'images')
+        os.makedirs(images_dir, exist_ok=True)
+        file_path = os.path.join(images_dir, filename)
+        # 이미 파일이 있으면 다운로드 생략
+        if not os.path.exists(file_path):
+            resp = requests.get(album_art_url, timeout=10)
+            if resp.status_code == 200:
+                with open(file_path, 'wb') as f:
+                    f.write(resp.content)
+        return filename
+    except Exception as e:
+        logging.warning(f"앨범아트 다운로드 실패: {e}")
+        return None
+
 def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S +0900")
     title = song_info["title"]
     artist = song_info["artist"]
     album = song_info["album"]
     release_date = song_info["release_date"]
-    album_art = song_info.get("album_art")
+    album_art_url = song_info.get("album_art")
+    # 앨범아트 다운로드 및 파일명만 image에 입력 (앨범+아티스트 기준)
+    image_filename = download_album_art(album_art_url, album, artist) if album_art_url else ''
     lyrics_lines = song_info["lyrics"].split("\n")
     formatted_lyrics = "\n".join([line.strip() + "  " for line in lyrics_lines if line.strip()])
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
-    # image, tags 필드 추가
-    image_field = f"image: {album_art if album_art else ''}"
-    tags_field = f"tags: [{artist}, {instrument}]"
     return f"""---
 layout: post
 title: {post_title}
 date: {now}
-image: {album_art if album_art else ''}
+image: {image_filename}
 tags: [{artist}, {instrument}]
 categories: sheet
 ---

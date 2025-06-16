@@ -27,6 +27,13 @@ def extract_lyrics(soup):
     ])
     return cleaned
 
+def get_album_art(soup):
+    # 앨범 아트 URL 추출
+    img_tag = soup.select_one('#d_song_org > a > img')
+    if img_tag and img_tag.has_attr('src'):
+        return img_tag['src']
+    return None
+
 def get_song(song_url: str):
     headers = {
         "User-Agent": "Mozilla/5.0",
@@ -54,12 +61,14 @@ def get_song(song_url: str):
         album = album_elem.text.strip()
         release_date = release_elem.text.strip()
         lyrics = extract_lyrics(soup)
+        album_art = get_album_art(soup)
         return {
             "title": title,
             "artist": artist,
             "album": album,
             "release_date": release_date,
-            "lyrics": lyrics
+            "lyrics": lyrics,
+            "album_art": album_art
         }
     except Exception as e:
         logging.error(f"오류 발생: {e}")

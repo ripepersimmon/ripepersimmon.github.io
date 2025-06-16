@@ -5,6 +5,12 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 import os
+from dotenv import load_dotenv
+
+# .env 파일에서 환경변수 불러오기
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -26,8 +32,8 @@ def generate_filename(song_info, instrument):
     # Windows에서 사용할 수 없는 문자 제거
     return re.sub(r'[<>:"/\\|?*]', '', raw_title)
 
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'AIzaSyBtWlcWfRUDOTU-m3eAnbHAlPbl_9oehCY')
-GOOGLE_CX = os.getenv('GOOGLE_CX', '431e1a41e8f814e44')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+GOOGLE_CX = os.getenv('GOOGLE_CX')
 
 # RAG(곡 정보 요약) 기능 임시 비활성화
 # def get_google_summary(query, lang='ko'):
@@ -61,19 +67,23 @@ def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
     artist = song_info["artist"]
     album = song_info["album"]
     release_date = song_info["release_date"]
+    album_art = song_info.get("album_art")
     lyrics_lines = song_info["lyrics"].split("\n")
     formatted_lyrics = "\n".join([line.strip() + "  " for line in lyrics_lines if line.strip()])
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
+    # 앨범 아트 썸네일 추가
+    thumbnail_md = f'![앨범아트]({album_art})\n' if album_art else ''
     return f"""---
 layout: post
 title: {post_title}
 date: {now}
 categories: sheet
+thumbnail: {album_art if album_art else ''}
 ---
 
-{youtube_embed}
+{thumbnail_md}{youtube_embed}
 
 ## 🎵 {title} - {artist}
 

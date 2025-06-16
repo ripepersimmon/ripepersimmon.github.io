@@ -1,0 +1,164 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository",
+        "description": "Create a new repository for the Auto Blog Post Generator project and initialize it with a basic directory structure.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Project Directory",
+            "description": "Set up a new folder to contain the Auto Blog Post Generator project files.",
+            "dependencies": [],
+            "details": "Use the command line to create a new directory (e.g., mkdir auto-blog-post-generator) and navigate into it (cd auto-blog-post-generator). Ensure the directory is named appropriately for the project.",
+            "status": "pending",
+            "testStrategy": "Verify the directory exists and is accessible by listing its contents."
+          },
+          {
+            "id": 2,
+            "title": "Initialize Git Repository",
+            "description": "Initialize a new Git repository within the project directory.",
+            "dependencies": [
+              1
+            ],
+            "details": "Run git init inside the project directory to create an empty Git repository. Confirm that a .git folder is created.",
+            "status": "pending",
+            "testStrategy": "Check for the presence of the .git directory using ls -a or equivalent."
+          },
+          {
+            "id": 3,
+            "title": "Create .gitignore File",
+            "description": "Add a .gitignore file to specify files and directories that should be excluded from version control.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a .gitignore file in the root of the project directory. Add common patterns such as node_modules/, .env, and any other files or folders that should not be tracked.",
+            "status": "pending",
+            "testStrategy": "Verify the .gitignore file exists and contains the correct patterns."
+          },
+          {
+            "id": 4,
+            "title": "Establish Basic Directory Structure",
+            "description": "Set up the initial directory structure for the project, including folders for source code, configuration, and documentation.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create directories such as src/, config/, and docs/ as needed for the project. Ensure the structure matches project conventions and requirements.",
+            "status": "pending",
+            "testStrategy": "List the contents of the project directory to confirm all required folders are present."
+          },
+          {
+            "id": 5,
+            "title": "Add README.md and Make Initial Commit",
+            "description": "Create a README.md file with basic project information and make the first commit to the repository.",
+            "dependencies": [
+              4
+            ],
+            "details": "Write a README.md file describing the project purpose, setup instructions, and any relevant details. Stage all files (git add .), commit them (git commit -m 'Initial project setup'), and verify the commit history.",
+            "status": "pending",
+            "testStrategy": "Check that README.md exists, git log shows the initial commit, and all intended files are tracked."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Install Required Libraries",
+        "description": "Install necessary Python libraries such as LangChain for file management and other dependencies.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Topic/Keyword-Based Post Generation",
+        "description": "Develop a Python script to generate blog posts based on given topics or keywords.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement External Data-Based Post Generation",
+        "description": "Create functionality to generate posts from external data sources like RSS, API, or CSV.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Automate Post Metadata Creation",
+        "description": "Develop a feature to automatically write post metadata such as title, date, and tags.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Ensure Jekyll Compatibility",
+        "description": "Ensure generated posts comply with Jekyll's file naming and formatting rules.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Scheduling and Manual Execution",
+        "description": "Add support for scheduling and manual execution of the script.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Test and Validate Generated Posts",
+        "description": "Develop a test suite to validate the correctness and quality of generated posts.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Deploy and Integrate with Jekyll Blog",
+        "description": "Deploy the script and integrate it with a Jekyll blog for automated posting.",
+        "details": "",
+        "testStrategy": "",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-16T01:53:30.425Z",
+      "updated": "2025-06-16T01:53:30.425Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

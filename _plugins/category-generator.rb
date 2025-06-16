@@ -10,7 +10,6 @@ module Jekyll
       self.read_yaml(File.join(base, '_layouts'), 'category-page.html')
       self.data['category'] = category
       self.data['title'] = category
-      self.data['permalink'] = File.join('/', dir, '/')
     end
   end
 
@@ -21,7 +20,8 @@ module Jekyll
       if site.layouts.key? 'category-page'
         dir = site.config['category_dir'] || 'category'
         site.categories.keys.each do |category|
-          site.pages << CategoryPage.new(site, site.source, File.join(dir, category.downcase.gsub(' ', '-')), category)
+          slug = Jekyll::Utils.slugify(category)
+          site.pages << CategoryPage.new(site, site.source, File.join(dir, slug), category)
         end
       end
     end

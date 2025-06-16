@@ -99,5 +99,21 @@ $(document).ready(function () {
     };
   });
 
+  // 다크모드 토글 버튼
+  const darkToggle = document.getElementById('darkmode-toggle');
+  if (darkToggle) {
+    // 초기 상태 복원
+    if (localStorage.getItem('darkmode') === 'on') {
+      document.body.classList.add('dark-mode');
+    }
+    darkToggle.onclick = function() {
+      document.body.classList.toggle('dark-mode');
+      if(document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkmode', 'on');
+      } else {
+        localStorage.setItem('darkmode', 'off');
+      }
+    }
+  }
 
 });

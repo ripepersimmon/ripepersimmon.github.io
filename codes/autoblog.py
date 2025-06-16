@@ -70,7 +70,7 @@ def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
 layout: post
 title: {post_title}
 date: {now}
-categories: "sheet music"
+categories: sheet
 ---
 
 {youtube_embed}

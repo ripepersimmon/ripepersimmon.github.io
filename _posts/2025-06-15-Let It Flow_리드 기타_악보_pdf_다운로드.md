@@ -2,7 +2,7 @@
 layout: post
 title: Let It Flow-양반들 (Yangbans)_리드 기타 악보 PDF 다운로드
 date: 2025-06-15 22:35:34 +0900
-categories: "sheet music"
+categories: sheet
 ---
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/T3zX2tOmZvA" frameborder="0" allowfullscreen></iframe>

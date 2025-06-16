@@ -2,7 +2,7 @@
 layout: post
 title: Do you like F ?-Bump2Soul_리드 기타 악보 PDF 다운로드
 date: 2025-06-15 21:07:37 +0900
-categories: "sheet music"
+categories: sheet
 ---
 
 <iframe width="560" height="315" src="https://www.youtube.com/watch?v=tHMfv6Svv94" frameborder="0" allowfullscreen></iframe>

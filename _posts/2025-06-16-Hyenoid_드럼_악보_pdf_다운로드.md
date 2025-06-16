@@ -17,14 +17,10 @@ title: Hyenoid-비공정_드럼 악보 PDF 다운로드
 
 {% include adsense.html %}
 
-{% include adsense.html %}
-
 - **앨범**: Neom 0541  
 - **발매일**: 2024.02.19  
 
 ### 가사
-
-{% include adsense.html %}
 
 {% include adsense.html %}
 다같이 다같이 걷자  
@@ -39,16 +35,11 @@ title: Hyenoid-비공정_드럼 악보 PDF 다운로드
 
 
 ## 다운로드
-{% include adsense.html %}
 
 {% include adsense.html %}
-{% include adsense.html %}
-
 <p><a href="https://drive.google.com/file/d/1ZsVzcpefh_zZ_VG-nblHT6z62T_GPAuG/view?usp=drive_link" download><strong>📥 Download Sheet Music</strong></a></p>
 
 ## 작성자 
-
-{% include adsense.html %}
 
 {% include adsense.html %}
 - **작성자**: autoblog.bot made by sahong

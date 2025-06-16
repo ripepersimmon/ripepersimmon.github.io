@@ -170,8 +170,9 @@ melon_url: {melon_url if melon_url else ''}
 - **작성자**: autoblog.bot made by sahong
 - **작성일**: {now}
 """
-    # 각 헤더(##, ### 등) 뒤에 adsense.html 광고 삽입
-    markdown = re.sub(r'(\n##+ .+?\n)', r'\1\n{{% include adsense.html %}}\n', markdown)
+    # 각 헤더(##, ### 등) 뒤에 adsense.html 광고 삽입 (불필요한 공백 최소화)
+    markdown = re.sub(r'\n{2,}', '\n', markdown)  # 연속 빈 줄 1줄로 축소
+    markdown = re.sub(r'(\n##+ .+?\n)\s*({% include adsense.html %})?\s*', r'\1{% include adsense.html %}\n', markdown)
     return markdown
 
 def save_markdown(output_filename, markdown_content):

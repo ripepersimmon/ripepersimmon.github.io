@@ -12,10 +12,10 @@ melon_url:
 <iframe width="560" height="315" src="https://www.youtube.com/embed/grnm2WKxwq4" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 MND (Maybe we're Not Destiny) - 향(HYANG)
-
+{% include adsense.html %}
 - **앨범**: Take off  
 - **발매일**: 2024.07.21  
-
+{% include adsense.html %}
 
 ### 가사
 I have the same dream every day  

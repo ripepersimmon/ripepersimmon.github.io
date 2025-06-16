@@ -1,10 +1,16 @@
 ---
-layout: post
-title: Hyenoid-비공정_리드 기타 악보 PDF 다운로드
-date: 2025-06-16 11:08:45 +0900
 categories: sheet
+date: 2025-06-16 11:08:45 +0900
+image: Neom0541_비공정_album.jpg
+layout: post
+melon_url: https://www.melon.com/song/detail.htm?songId=37220028
+tags:
+- 비공정
+- 리드 기타
+title: Hyenoid-비공정_리드 기타 악보 PDF 다운로드
 ---
 
+<p><a href="https://www.melon.com/song/detail.htm?songId=37220028" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/SaSYTKDUwcc" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Hyenoid - 비공정

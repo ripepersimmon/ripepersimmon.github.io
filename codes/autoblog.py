@@ -83,20 +83,20 @@ def download_album_art(album_art_url, album, artist):
         logging.warning(f"앨범아트 다운로드 실패: {e}")
         return None
 
-def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
+def make_markdown(song_info, youtube_url: str, filename: str, instrument: str, melon_url: str = None):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S +0900")
     title = song_info["title"]
     artist = song_info["artist"]
     album = song_info["album"]
     release_date = song_info["release_date"]
     album_art_url = song_info.get("album_art")
-    # 앨범아트 다운로드 및 파일명만 image에 입력 (앨범+아티스트 기준)
     image_filename = download_album_art(album_art_url, album, artist) if album_art_url else ''
     lyrics_lines = song_info["lyrics"].split("\n")
     formatted_lyrics = "\n".join([line.strip() + "  " for line in lyrics_lines if line.strip()])
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
+    listen_btn = f'<p><a href="{melon_url}" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>' if melon_url else ''
     return f"""---
 layout: post
 title: {post_title}
@@ -104,8 +104,10 @@ date: {now}
 image: {image_filename}
 tags: [{artist}, {instrument}]
 categories: sheet
+melon_url: {melon_url if melon_url else ''}
 ---
 
+{listen_btn}
 {youtube_embed}
 
 ## 🎵 {title} - {artist}

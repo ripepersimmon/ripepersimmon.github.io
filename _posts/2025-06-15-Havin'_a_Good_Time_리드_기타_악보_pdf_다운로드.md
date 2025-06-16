@@ -1,10 +1,16 @@
 ---
-layout: post
-title: Havin' a Good Time-KARDI (카디)_리드 기타 악보 PDF 다운로드
-date: 2025-06-15 19:48:14 +0900
 categories: sheet
+date: 2025-06-15 19:48:14 +0900
+image: HavinaGoodTime_KARDI카디_album.jpg
+layout: post
+melon_url: https://www.melon.com/song/detail.htm?songId=37773181
+tags:
+- KARDI (카디)
+- 리드 기타
+title: Havin' a Good Time-KARDI (카디)_리드 기타 악보 PDF 다운로드
 ---
 
+<p><a href="https://www.melon.com/song/detail.htm?songId=37773181" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/AKdwcOVck58" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Havin' a Good Time - KARDI (카디)

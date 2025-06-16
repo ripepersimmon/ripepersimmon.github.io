@@ -1,10 +1,16 @@
 ---
-layout: post
-title: Let It Flow-양반들 (Yangbans)_리드 기타 악보 PDF 다운로드
-date: 2025-06-15 22:35:34 +0900
 categories: sheet
+date: 2025-06-15 22:35:34 +0900
+image: HymnsfromtheDragonLake_양반들Yangbans_album.jpg
+layout: post
+melon_url: https://www.melon.com/song/detail.htm?songId=37617644
+tags:
+- 양반들 (Yangbans)
+- 리드 기타
+title: Let It Flow-양반들 (Yangbans)_리드 기타 악보 PDF 다운로드
 ---
 
+<p><a href="https://www.melon.com/song/detail.htm?songId=37617644" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/T3zX2tOmZvA" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Let It Flow - 양반들 (Yangbans)

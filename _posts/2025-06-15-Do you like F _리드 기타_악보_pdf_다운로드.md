@@ -1,10 +1,16 @@
 ---
-layout: post
-title: Do you like F ?-Bump2Soul_리드 기타 악보 PDF 다운로드
-date: 2025-06-15 21:07:37 +0900
 categories: sheet
+date: 2025-06-15 21:07:37 +0900
+image: Bump2Soul_Bump2Soul_album.jpg
+layout: post
+melon_url: https://www.melon.com/song/detail.htm?songId=37242335
+tags:
+- Bump2Soul
+- 리드 기타
+title: Do you like F ?-Bump2Soul_리드 기타 악보 PDF 다운로드
 ---
 
+<p><a href="https://www.melon.com/song/detail.htm?songId=37242335" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>
 <iframe width="560" height="315" src="https://www.youtube.com/watch?v=tHMfv6Svv94" frameborder="0" allowfullscreen></iframe>
 
 ## 🎵 Do you like F ? - Bump2Soul

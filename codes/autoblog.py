@@ -164,7 +164,7 @@ melon_url: {melon_url if melon_url else ''}
 
 {download_button}
 
-{{'% include adsense.html %'}}
+{{% include adsense.html %}}
 
 ## 작성자 
 - **작성자**: autoblog.bot made by sahong

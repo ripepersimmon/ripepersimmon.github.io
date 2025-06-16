@@ -73,17 +73,19 @@ def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
-    # 앨범 아트 썸네일 추가
-    thumbnail_md = f'![앨범아트]({album_art})\n' if album_art else ''
+    # image, tags 필드 추가
+    image_field = f"image: {album_art if album_art else ''}"
+    tags_field = f"tags: [{artist}, {instrument}]"
     return f"""---
 layout: post
 title: {post_title}
 date: {now}
+image: {album_art if album_art else ''}
+tags: [{artist}, {instrument}]
 categories: sheet
-thumbnail: {album_art if album_art else ''}
 ---
 
-{thumbnail_md}{youtube_embed}
+{youtube_embed}
 
 ## 🎵 {title} - {artist}
 

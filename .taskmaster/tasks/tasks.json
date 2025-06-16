@@ -39,7 +39,7 @@
               2
             ],
             "details": "Create a .gitignore file in the root of the project directory. Add common patterns such as node_modules/, .env, and any other files or folders that should not be tracked.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify the .gitignore file exists and contains the correct patterns."
           },
           {
@@ -50,7 +50,7 @@
               3
             ],
             "details": "Create directories such as src/, config/, and docs/ as needed for the project. Ensure the structure matches project conventions and requirements.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "List the contents of the project directory to confirm all required folders are present."
           },
           {
@@ -61,7 +61,7 @@
               4
             ],
             "details": "Write a README.md file describing the project purpose, setup instructions, and any relevant details. Stage all files (git add .), commit them (git commit -m 'Initial project setup'), and verify the commit history.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check that README.md exists, git log shows the initial commit, and all intended files are tracked."
           }
         ]
@@ -85,7 +85,7 @@
         "testStrategy": "",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -157,7 +157,7 @@
     ],
     "metadata": {
       "created": "2025-06-16T01:53:30.425Z",
-      "updated": "2025-06-16T01:53:30.425Z",
+      "updated": "2025-06-16T02:11:55.658Z",
       "description": "Tasks for master context"
     }
   }

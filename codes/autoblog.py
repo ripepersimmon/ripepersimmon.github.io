@@ -66,13 +66,11 @@ def make_markdown(song_info, youtube_url: str, filename: str, instrument: str):
     post_title = f"{title}-{artist}_{instrument} 악보 PDF 다운로드"
     youtube_embed = f'<iframe width="560" height="315" src="{youtube_url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>'
     download_button = f'<p><a href="{filename}" download><strong>📥 Download Sheet Music</strong></a></p>'
-    # info_query = f"{title} {artist} 곡 정보"
-    # song_summary = get_google_summary(info_query)
     return f"""---
 layout: post
 title: {post_title}
 date: {now}
-categories: sheet music
+categories: "sheet music"
 ---
 
 {youtube_embed}

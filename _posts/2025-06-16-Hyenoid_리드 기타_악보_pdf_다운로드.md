@@ -2,7 +2,7 @@
 layout: post
 title: Hyenoid-비공정_리드 기타 악보 PDF 다운로드
 date: 2025-06-16 11:08:45 +0900
-categories: sheet music
+categories: "sheet music"
 ---
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/SaSYTKDUwcc" frameborder="0" allowfullscreen></iframe>

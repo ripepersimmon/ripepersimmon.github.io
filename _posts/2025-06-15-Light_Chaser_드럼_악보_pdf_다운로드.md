@@ -2,7 +2,7 @@
 layout: post
 title: Light Chaser-JISOKURY_드럼 악보 PDF 다운로드
 date: 2025-06-15 19:14:44 +0900
-categories: sheet music
+categories: "sheet music"
 ---
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/6jHkkhyRbn0" frameborder="0" allowfullscreen></iframe>

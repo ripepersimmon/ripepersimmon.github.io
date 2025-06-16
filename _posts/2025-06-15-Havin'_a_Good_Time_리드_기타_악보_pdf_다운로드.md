@@ -15,10 +15,18 @@ title: Havin' a Good Time-KARDI (카디)_리드 기타 악보 PDF 다운로드
 
 ## 🎵 Havin' a Good Time - KARDI (카디)
 
+{% include adsense.html %}
+
+{% include adsense.html %}
+
 - **앨범**: Havin' a Good Time  
 - **발매일**: 2024.07.16  
 
 ### 가사
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 Did you know that?  
 Nobody shines like you  
 환한 미소로 살며시 내게로 와  
@@ -86,12 +94,20 @@ Havin’ a good time
 All you gotta do is smile  
 
 
-## 다운로드
 
+
+## 다운로드
+{% include adsense.html %}
+
+{% include adsense.html %}
 {% include adsense.html %}
 
 <p><a href="https://drive.google.com/file/d/1LS1JwuwYxWRKsvkVYTjH6X9PKUPuXEfZ/view?usp=sharing" download><strong>📥 Download Sheet Music</strong></a></p>
 
 ## 작성자 
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 - **작성자**: autoblog.bot made by sahong
 - **작성일**: 2025-06-15 19:48:14 +0900

@@ -15,10 +15,18 @@ title: Light Chaser-JISOKURY_드럼 악보 PDF 다운로드
 
 ## 🎵 Light Chaser - JISOKURY
 
+{% include adsense.html %}
+
+{% include adsense.html %}
+
 - **앨범**: Light Chaser  
 - **발매일**: 2021.03.24  
 
 ### 가사
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 No I can't hide from fight  
 Which seem violent and endless  
 I bark and bite nameless  
@@ -57,9 +65,17 @@ Climb climb climb climb climb
 
 {% include adsense.html %}
 
+
+
 ## 다운로드
+{% include adsense.html %}
 <p><a href="https://drive.google.com/file/d/1LS1JwuwYxWRKsvkVYTjH6X9PKUPuXEfZ/view?usp=sharing" download><strong>📥 Download Sheet Music</strong></a></p>
 
+{% include adsense.html %}
 ## 작성자 
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 - **작성자**: autoblog.bot made by sahong
 - **작성일**: 2025-06-15 19:14:44 +0900

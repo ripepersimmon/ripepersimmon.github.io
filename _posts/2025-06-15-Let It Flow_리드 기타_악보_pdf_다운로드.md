@@ -15,10 +15,18 @@ title: Let It Flow-양반들 (Yangbans)_리드 기타 악보 PDF 다운로드
 
 ## 🎵 Let It Flow - 양반들 (Yangbans)
 
+{% include adsense.html %}
+
+{% include adsense.html %}
+
 - **앨범**: Hymns from the Dragon Lake  
 - **발매일**: 2024.06.12  
 
 ### 가사
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 봐 내 사랑아  
 저 하나뿐인 별 위에  
 하늘과 땅과 바다  
@@ -42,12 +50,20 @@ Everything will glow
 물 속으로  
 
 
-## 다운로드
 
+
+## 다운로드
+{% include adsense.html %}
+
+{% include adsense.html %}
 {% include adsense.html %}
 
 <p><a href="https://drive.google.com/file/d/1zxU6KXUoCHjpVB-cBxM0O7GkOZqWIHxG/view?usp=drive_link" download><strong>📥 Download Sheet Music</strong></a></p>
 
 ## 작성자 
+
+{% include adsense.html %}
+
+{% include adsense.html %}
 - **작성자**: autoblog.bot made by sahong
 - **작성일**: 2025-06-15 22:35:34 +0900

@@ -1,9 +1,14 @@
 import os
 import re
-import logging
 import frontmatter
+import logging
 from melon import get_song
 from autoblog import download_album_art
+import requests
+from dotenv import load_dotenv
+
+# codes/.env 파일 명시적 로드
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 def update_post_metadata(md_path):
     post = frontmatter.load(md_path)
@@ -42,6 +47,10 @@ def update_post_metadata(md_path):
     listen_btn = f'<p><a href="{melon_url}" target="_blank"><strong>🎧 원곡 들으러가기</strong></a></p>'
     if listen_btn not in post.content:
         post.content = listen_btn + '\n' + post.content
+    # 본문 내 각 헤더(##, ### 등) 뒤에 adsense.html 광고 삽입
+    post.content = re.sub(r'(\n##+ .+?\n)', r'\1\n{% include adsense.html %}\n', post.content)
+    # 다운로드 섹션 내 기존 광고 코드 제거 후, 다운로드 버튼 아래에만 광고 삽입
+    post.content = re.sub(r'(## 다운로드\n)(\s*\{\% include adsense.html \%\}\s*\n)?(.*?)(\n\n|\Z)', r'\1\3\n\n{% include adsense.html %}\n', post.content, flags=re.DOTALL)
     # 저장 (date는 그대로)
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(frontmatter.dumps(post))

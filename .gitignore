@@ -1,0 +1,12 @@
+# original CV copy (served copy is cv.pdf)
+Sahong_Park_s_CV-1.pdf
+
+# tooling
+node_modules/
+.omc/
+graphify-out/
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini

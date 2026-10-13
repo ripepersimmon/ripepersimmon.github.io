@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Live-web agent traces — what the agent searched, saw, opened and wrote</title>
+<style>
+:root{--ink:#1f2328;--muted:#6b7280;--line:#e5e7eb;--surface:#fff;--bg:#f6f7f9;
+ --up:#1a7f37;--upbg:#e6f4ea;--dn:#b42318;--dnbg:#fde8e6;--neu:#4b5563;--neubg:#eef0f3;--open:#2563eb;--openbg:#eaf1ff;--new:#fff7d6}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+header h1{font-size:15px;margin:0 12px 0 0;font-weight:600}
+label.c{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+select,input{font:13px inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:#fff;max-width:340px}
+main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 18px}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.pane h2{font-size:15px;margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sub{color:var(--muted);font-size:12px;margin-bottom:10px}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.02em}
+.buy{background:var(--upbg);color:var(--up)}.sell{background:var(--dnbg);color:var(--dn)}.none{background:var(--neubg);color:var(--neu)}
+.chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11.5px;border:1px solid transparent;white-space:nowrap}
+.chip.up{background:var(--upbg);color:var(--up)}.chip.down{background:var(--dnbg);color:var(--dn)}.chip.neutral{background:var(--neubg);color:var(--neu)}
+.chip.q{background:#f1f5f9;color:#334155;border-color:#e2e8f0}.chip.pad{background:#f8f8f8;color:#777;border-color:#e5e5e5}
+.chip.opened{background:var(--openbg);color:var(--open)}.chip.only{background:var(--new);color:#7a5a00}
+h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+ol.queries{margin:0;padding-left:0;list-style:none}ol.queries li{display:flex;gap:8px;align-items:baseline;padding:3px 0;border-bottom:1px dashed var(--line)}
+ol.queries .qn{color:var(--muted);font-size:12px;width:26px;flex:none}ol.queries .qt{flex:1}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:6px 0 2px}.stats b{color:var(--ink);font-weight:600}
+.item{padding:9px 10px 9px 12px;border-left:3px solid transparent;border-bottom:1px solid var(--line)}
+.item.open{border-left-color:var(--open);background:#fbfcff}.item.onlyhere{background:var(--new)}
+.item .top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.item .rank{color:var(--muted);font-size:12px;min-width:22px}
+.item a{color:#1d4ed8;text-decoration:none;font-weight:600}.item a:hover{text-decoration:underline}
+.item .meta{font-size:12px;color:var(--muted);margin:2px 0 3px}
+.item .sn{font-size:13px;color:#374151}
+.memo{white-space:pre-wrap;font-size:13.5px;line-height:1.5;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.diffnote{font-size:12px;color:var(--muted);margin-top:4px}
+.intro{margin:14px 18px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 16px;font-size:13.5px;color:#374151}.intro p{margin:6px 0}.intro summary{cursor:pointer;font-size:13px}
+#status{font-size:12px;color:var(--open)}
+footer{padding:8px 18px 24px;color:var(--muted);font-size:12px}
+</style></head><body>
+<header><h1>Live-web agent traces</h1>
+<label class="c">model<select id="model"></select></label>
+<label class="c">company<select id="doc"></select></label>
+<label class="c">trial<select id="trial"><option value="0">0 (buy/sell)</option><option value="1">1 (sell/buy)</option></select></label>
+<label class="c">left arm<select id="L"></select></label>
+<label class="c">right arm<select id="R"></select></label>
+<span id="status"></span>
+<label class="c">judge<select id="judge"><option value="qwen">Qwen3 (local)</option><option value="gemini">Gemini</option></select></label>
+<span style="font-size:12px;color:var(--muted)">▲ favourable · ▼ unfavourable · • neutral (sentence counts of headline+snippet) · blue bar = opened · yellow = only on this side</span>
+</header>
+<section class="intro"><details open><summary><b>What this is</b> (click to fold)</summary>
+<p>Three open-weight language models (Qwen3-8B, Mistral-Small-24B-Instruct, Gemma4-12B-it) run the same three-turn
+research loop over a <b>live news search engine</b> (Bing News, past month; results are snapshot-cached, so every arm sees
+byte-identical results for identical queries). Turn 1: the model writes four search queries about the company. Turn 2: it sees
+the returned result page (headline + snippet) and chooses four results to open. Turn 3: it reads the articles, writes a memo
+and gives a buy/sell decision.</p>
+<p>Arms differ only in the intervention applied to the model: <b>baseline</b>; a <b>single-neuron additive shift</b> (the
+&ldquo;dial&rdquo;, one MLP neuron, one scalar); a <b>decision-token logit offset</b> calibrated to the same decision index
+&pi; = (buy&nbsp;&minus;&nbsp;sell)/(buy&nbsp;+&nbsp;sell); <b>contrastive activation addition</b> (CAA); a second neuron from
+the same model; and write-norm-matched <b>placebo neurons</b>. Direction labels (&#9650; favourable / &#9660; unfavourable /
+&bull; neutral, for an investor in the company) are given per sentence of headline + snippet by an un-intervened Qwen3-8B
+judge, or by Gemini. 150 held-out S&amp;P&nbsp;500 companies &times; 2 trials (decision-option order counterbalanced),
+greedy decoding.</p>
+<p>Pick a company and two arms to compare what the model asked, what the engine returned, what it opened and what it wrote.
+Yellow rows are results that appear only on that side; a blue bar marks an opened result. Companion material for
+<a href="https://arxiv.org/abs/2608.22852">&ldquo;Your AI, On a Dial&rdquo; (arXiv:2608.22852)</a>. Research artefact; not
+investment advice. &larr; <a href="../">ripepersimmon.github.io</a></p></details></section>
+<main><section class="pane" id="paneL"></section><section class="pane" id="paneR"></section></main>
+<footer>Result page shown in the order the agent saw it at turn 2 (fused rank in parentheses). "padding" = item from the fixed neutral seed query, not from the agent's queries. Memo and decision are turn 3. Bing News via ddgs, past month; snapshot cache so both arms see byte-identical results for identical queries.</footer>
+<script>
+const P=null;let D,IT;
+async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(u+" → HTTP "+r.status);return r.json()}
+function status(t){document.getElementById("status").textContent=t||""}
+async function ensure(m){if(!D.models[m].runs){status(`loading ${D.models[m].label} runs …`);D.models[m].runs=(await getJSON(`data/runs_${m}.json`)).runs;status("")}}
+async function boot(){try{if(P){D=P.data;IT=P.items}else{status("loading …");const meta=await getJSON("data/meta.json");D={models:meta.models,qlab:meta.qlab};IT=await getJSON("data/items.json");status("")}await render()}catch(e){status("failed: "+e.message)}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function state(){const u=new URLSearchParams(location.search);return{model:u.get("model")||"qwen",doc:u.get("doc"),trial:u.get("trial")||"0",L:u.get("L"),R:u.get("R"),judge:u.get("judge")||"qwen"}}
+function push(s){const u=new URLSearchParams(s);history.replaceState(null,"","?"+u.toString())}
+function fill(sel,opts,val){sel.innerHTML="";for(const[v,t]of opts){const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o)}if(val&&opts.some(o=>o[0]===val))sel.value=val}
+function armTitle(m,a){const A=D.models[m].arms[a];const d=A.delta==null?"":` Δ${A.delta>0?"+":""}${(+A.delta).toFixed(2)}`;return `${a} — ${A.label}${d} · arm π ${A.pi>0?"+":""}${A.pi}`}
+function dir(c){if(!c)return"neutral";const[u,d]=c;return d>u?"down":u>d?"up":"neutral"}
+function lab(pid,j){const it=IT[pid];if(!it)return null;return j==="gemini"?it.g:it.q}
+function shares(run,j){const ql=D.qlab[j]||{};let qd=0,qn=0;for(const q of run.q){const l=ql[q.trim()];if(l){qn++;if(l==="down")qd++}}
+ let pu=0,pd=0,ou=0,od=0;for(const x of run.page){const c=lab(x.p,j);if(!c)continue;if(x.f){pu+=c[0];pd+=c[1]}if(run.o.includes(x.p)){ou+=c[0];od+=c[1]}}
+ const f=(a,b)=>b?(a/b).toFixed(2):"–";return{q:qn?(qd/qn).toFixed(2):"–",page:f(pd,pu+pd),open:f(od,ou+od)}}
+async function render(){const s=state();const m=D.models[s.model]?s.model:Object.keys(D.models)[0];s.model=m;await ensure(m);const M=D.models[m];
+ const docs=Object.entries(M.docs).sort((a,b)=>a[1].t.localeCompare(b[1].t));
+ const arms=Object.keys(M.arms);const base=arms.find(a=>/^d\+0(_|$)/.test(a))||arms[0];
+ if(!s.doc||!M.docs[s.doc])s.doc=docs[0][0];if(!s.L||!M.arms[s.L])s.L=base;
+ if(!s.R||!M.arms[s.R])s.R=arms.find(a=>M.arms[a].role==="dial"&&a!==base&&M.arms[a].pi<0)||arms.find(a=>a!==base)||base;
+ fill($("model"),Object.entries(D.models).map(([k,v])=>[k,v.label]),m);
+ fill($("doc"),docs.map(([k,v])=>[k,`${v.t} — ${v.n}`]),s.doc);$("trial").value=s.trial;
+ fill($("L"),arms.map(a=>[a,armTitle(m,a)]),s.L);fill($("R"),arms.map(a=>[a,armTitle(m,a)]),s.R);$("judge").value=s.judge;push(s);
+ const rl=M.runs[`${s.L}|${s.doc}|${s.trial}`],rr=M.runs[`${s.R}|${s.doc}|${s.trial}`];
+ pane($("paneL"),m,s.L,rl,rr,s.judge);pane($("paneR"),m,s.R,rr,rl,s.judge)}
+function pane(el,m,arm,run,other,j){if(!run){el.innerHTML=`<h2>${esc(armTitle(m,arm))}</h2><p class="sub">no run for this company/trial in this arm</p>`;return}
+ const ql=D.qlab[j]||{};const otherP=new Set(other?other.page.map(x=>x.p):[]);const sh=shares(run,j);
+ const dec=run.dec||"none";let h=`<h2>${esc(armTitle(m,arm))} <span class="badge ${dec}">${dec.toUpperCase()}</span></h2>`;
+ h+=`<div class="sub">${D.models[m].label} · ${esc(D.models[m].docs[$("doc").value].n)} · trial ${$("trial").value}${run.dial_turns&&run.dial_turns!=="all"?` · dial on turns ${run.dial_turns} only`:""}${run.frozen?" · pages frozen from baseline":""}</div>`;
+ h+=`<div class="stats"><span>downside share — queries <b>${sh.q}</b></span><span>result page <b>${sh.page}</b></span><span>opened <b>${sh.open}</b></span><span>found by queries <b>${run.nf??"–"}/10</b></span></div>`;
+ h+=`<h3>Turn 1 — queries</h3><ol class="queries">`;run.q.forEach((q,i)=>{const l=ql[q.trim()]||"neutral";h+=`<li><span class="qn">Q${i+1}</span><span class="qt">${esc(q)}</span><span class="chip ${l}">${l==="up"?"▲ favourable":l==="down"?"▼ unfavourable":"• neutral"}</span></li>`});h+=`</ol>`;
+ h+=`<h3>Turn 2 — result page (as presented) → opened ${run.o.length}</h3>`;
+ run.page.forEach((x,k)=>{const it=IT[x.p]||{};const c=lab(x.p,j)||[0,0,0];const d=dir(c);const isOpen=run.o.includes(x.p);const oi=run.o.indexOf(x.p);const ok=oi>=0?run.ok[oi]:null;
+  h+=`<div class="item ${isOpen?"open":""} ${otherP.has(x.p)?"":"onlyhere"}"><div class="top"><span class="rank">${k+1}. <span style="color:#bbb">(${x.r+1})</span></span>`;
+  h+=`<a href="${esc(it.u)}" target="_blank" rel="noopener">${esc(it.h)}</a>`;
+  if(isOpen)h+=`<span class="chip opened">opened${ok===false?" · snippet only":ok?" · full article":""}</span>`;
+  if(!otherP.has(x.p))h+=`<span class="chip only">only on this side</span>`;h+=`</div>`;
+  h+=`<div class="meta">${esc(it.s)}${it.d?" · "+esc(it.d):""} · ${x.f?`<span class="chip q">found by Q${(x.qi??0)+1}</span>`:`<span class="chip pad">padding</span>`} · <span class="chip ${d}">${d==="up"?"▲":d==="down"?"▼":"•"} ${c[0]}▲ ${c[1]}▼ ${c[2]}•</span></div>`;
+  h+=`<div class="sn">${esc(it.sn)}</div></div>`});
+ h+=`<h3>Turn 3 — memo</h3><div class="memo">${esc(run.memo)}</div>`;
+ const onlyHere=run.page.filter(x=>!otherP.has(x.p)).length;h+=`<div class="diffnote">${onlyHere} of ${run.page.length} items are not on the other side; opened sets ${other&&run.o.slice().sort().join()===other.o.slice().sort().join()?"identical":"differ"}.</div>`;
+ el.innerHTML=h}
+for(const id of["model","doc","trial","L","R","judge"]){$(id).addEventListener("change",()=>{const s=state();s[id]=$(id).value;if(id==="model"){s.doc=null;s.L=null;s.R=null}push(s);render()})}
+boot();
+</script></body></html>

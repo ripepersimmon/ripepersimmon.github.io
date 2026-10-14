@@ -27,6 +27,9 @@ u { text-decoration: underline; }
 .masthead .inner { max-width: 1140px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
 .masthead .site { font-size: 1.25em; font-weight: 700; color: var(--text); }
 .masthead .site:hover { text-decoration: none; }
+.masthead nav { display: flex; align-items: center; gap: 1em; }
+.masthead nav a { color: var(--muted); }
+.masthead nav a:hover, .masthead nav a[aria-current] { color: var(--text); text-decoration: none; }
 #theme-toggle { background: none; border: 0; cursor: pointer; color: var(--text); font-size: 1.1em; padding: 6px; }
 
 /* Layout */
@@ -42,6 +45,7 @@ u { text-decoration: underline; }
 
 /* Content */
 article { min-width: 0; font-size: 0.95em; }
+.page { max-width: 1140px; margin: 0 auto; padding: 2em 16px; font-size: 0.95em; }
 details summary { cursor: pointer; color: var(--link); margin-bottom: 0.6em; }
 .jc li { font-size: 0.93em; margin-bottom: 0.5em; }
 

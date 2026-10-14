@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo · Sahong Park</title>
+<meta name="description" content="Interactive companion material for Sahong Park's papers.">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="masthead"><div class="inner">
+  <a class="site" href="../">Sahong Park</a>
+  <nav><a href="./" aria-current="page">Demo</a><button id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">◐</button></nav>
+</div></div>
+
+<main class="page">
+<h2>Demo</h2>
+<ul>
+  <li><a href="../web-traces/"><strong>Your AI, On a Dial: Agent Retrieval Experiment</strong></a><br>
+  <span class="meta">What a news-research agent searches, reads and concludes when one neuron is shifted, side by side with the baseline and control interventions. Companion to <a href="https://arxiv.org/abs/2608.22852">arXiv:2608.22852</a>.</span></li>
+</ul>
+</main>
+
+<footer class="footer">© 2026 Sahong Park · <a href="https://github.com/ripepersimmon">GitHub</a> · <a href="../cv.pdf">CV</a></footer>
+
+<script>
+document.getElementById('theme-toggle').onclick=function(){
+  var r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme);}catch(e){}
+};
+</script>
+</body>
+</html>

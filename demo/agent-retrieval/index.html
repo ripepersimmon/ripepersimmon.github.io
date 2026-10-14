@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your AI, On a Dial: Agent Retrieval Experiment · Sahong Park</title>
+<meta name="description" content="Selected traces of a news-research agent with and without a single-neuron shift, side by side. Companion to arXiv:2608.22852.">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="stylesheet" href="../../style.css">
+<style>
+:root { --up: #2e7d32; --down: #c62828; --hl: #f6f2e6; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --up: #81c784; --down: #ef9a9a; --hl: #2d323d; }
+}
+:root[data-theme="dark"] { --up: #81c784; --down: #ef9a9a; --hl: #2d323d; }
+
+h1 { font-size: 1.6em; margin: 0 0 0.6em; }
+.up { color: var(--up); }
+.down { color: var(--down); }
+.meta b { color: var(--text); font-weight: 600; }
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6em 1.2em; margin: 1.5em 0 0.5em; }
+.controls label { display: flex; flex-direction: column; font-size: 0.85em; color: var(--muted); }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--muted); border-radius: 3px; padding: 0.15em 0.3em; max-width: 22em; }
+.panes { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5em; margin-top: 2em; }
+.pane { min-width: 0; }
+.pane h2 { font-size: 1.15em; }
+.pane h3 { font-size: 1em; margin: 1.6em 0 0.5em; }
+.queries { list-style: none; padding: 0; }
+.queries li { margin: 0 0 0.3em; }
+.item { padding: 0.45em 0.6em; border-left: 3px solid transparent; margin-bottom: 0.2em; }
+.item.open { border-left-color: var(--link); }
+.item.only { background: var(--hl); }
+.item .meta { font-size: 0.85em; }
+.memo { white-space: pre-wrap; padding-left: 0.8em; border-left: 3px solid var(--muted); }
+@media (max-width: 760px) { .panes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="masthead"><div class="inner">
+  <a class="site" href="../../">Sahong Park</a>
+  <nav><a href="../" aria-current="true">Demo</a><button id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">◐</button></nav>
+</div></div>
+
+<main class="page">
+<h1>Your AI, On a Dial: Agent Retrieval Experiment</h1>
+<p>Traces from the agent experiment in <a href="https://arxiv.org/abs/2608.22852">“Your AI, On a Dial”</a> (arXiv:2608.22852). An open-weight model runs a three-turn research loop over a live news search engine: it writes four search queries, picks four of the ten returned results to open, then reads them and writes a memo ending in a buy/sell decision. Each example runs the same company twice, once as is (baseline) and once with the dial, a shift on a single neuron, and shows the two traces side by side.</p>
+<details>
+<summary>Setup</summary>
+<ul>
+  <li><strong>Models.</strong> Qwen3-8B, Mistral-Small-24B and Gemma4-12B-it, greedy decoding.</li>
+  <li><strong>Search.</strong> Bing News (past month) via ddgs. Results are snapshot-cached, so identical queries return identical pages in both runs.</li>
+  <li><strong>Dial.</strong> An additive shift on one MLP neuron at the strongest setting tested (Δ in the right-hand title). π = (buy − sell) / (buy + sell) over all 300 runs of a setting.</li>
+  <li><strong>Labels.</strong> Gemini labels each sentence of headline and snippet as favourable, unfavourable or neutral for an investor in the company.</li>
+  <li><strong>Examples.</strong> Selected, not representative. Out of 150 held-out S&amp;P 500 companies × 2 option orders, only cases where the baseline buys and the dial sells are kept, cases whose queries, memo or opened articles failed to parse are dropped, and up to ten per model are shown, ranked by the rise in unfavourable queries and in the unfavourable share of opened articles. Aggregate results are in the paper.</li>
+  <li><strong>Result page.</strong> Shown in the order the agent saw it, fused rank in parentheses. “Padding” marks an item from a fixed neutral seed query rather than from the agent's own queries. Where the scraped snippet is page boilerplate rather than article text, it is omitted here; the agent saw it as scraped.</li>
+</ul>
+<p class="meta">Research artefact; not investment advice.</p>
+</details>
+
+<div class="controls">
+  <label>Model <select id="model"></select></label>
+  <label>Company <select id="ex"></select></label>
+  <span id="status" class="meta"></span>
+</div>
+<p class="meta"><span class="up">▲</span> favourable · <span class="down">▼</span> unfavourable · • neutral (sentence counts over headline and snippet). Left bar: opened. Shaded: not on the other side.</p>
+
+<div class="panes"><section class="pane" id="paneL"></section><section class="pane" id="paneR"></section></div>
+</main>
+
+<footer class="footer">© 2026 Sahong Park · <a href="https://github.com/ripepersimmon">GitHub</a> · <a href="../../cv.pdf">CV</a></footer>
+
+<script>
+document.getElementById('theme-toggle').onclick=function(){
+  var r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme);}catch(e){}
+};
+
+let D;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sgn=x=>(x>0?"+":"")+x;
+const SYM={up:"▲",down:"▼",neutral:"•"};
+function status(t){$("status").textContent=t||""}
+async function boot(){try{status("loading …");const r=await fetch("data.json");if(!r.ok)throw new Error("data.json → HTTP "+r.status);D=await r.json();status("");render()}catch(e){status("failed: "+e.message)}}
+function push(s){history.replaceState(null,"","?"+new URLSearchParams(s))}
+function fill(sel,opts,val){sel.innerHTML="";for(const[v,t]of opts){const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o)}sel.value=val}
+function dir(c){if(!c)return"neutral";const[u,d]=c;return d>u?"down":u>d?"up":"neutral"}
+function shares(run){let qd=0,qn=0;for(const q of run.q){const l=D.ql[q.trim()];if(l){qn++;if(l==="down")qd++}}
+  let pu=0,pd=0,ou=0,od=0;for(const x of run.page){const c=D.items[x.p]?.g;if(!c)continue;if(x.f){pu+=c[0];pd+=c[1]}if(run.o.includes(x.p)){ou+=c[0];od+=c[1]}}
+  const f=(a,b)=>b?(a/b).toFixed(2):"–";return{q:qn?(qd/qn).toFixed(2):"–",page:f(pd,pu+pd),open:f(od,ou+od)}}
+function render(){const u=new URLSearchParams(location.search);let m=u.get("model");if(!D.models[m])m=Object.keys(D.models)[0];const M=D.models[m];
+  const e=M.ex.find(e=>e.d===u.get("ex"))||M.ex[0];
+  fill($("model"),Object.entries(D.models).map(([k,v])=>[k,v.label]),m);fill($("ex"),M.ex.map(e=>[e.d,`${e.tk} — ${e.n}`]),e.d);push({model:m,ex:e.d});
+  pane($("paneL"),"Baseline",M.base,M,e,e.b,e.x);pane($("paneR"),"Dial",M.dial,M,e,e.x,e.b)}
+function pane(el,name,A,M,e,run,other){const otherP=new Set(other.page.map(x=>x.p)),sh=shares(run);
+  let h=`<h2>${name}${A.delta?` · Δ ${sgn(+A.delta.toFixed(2))}`:""} · π ${sgn(A.pi)} · <span class="${run.dec==="buy"?"up":"down"}">${esc(run.dec).toUpperCase()}</span></h2>`;
+  h+=`<p class="meta">${esc(M.label)} · ${esc(e.n)} · options shown ${e.t==="0"?"buy/sell":"sell/buy"}<br>`;
+  h+=`Downside share: queries <b>${sh.q}</b> · result page <b>${sh.page}</b> · opened <b>${sh.open}</b> · found by queries <b>${run.nf??"–"}/10</b></p>`;
+  h+=`<h3>Turn 1: queries</h3><ol class="queries">`;
+  run.q.forEach((q,i)=>{const l=D.ql[q.trim()]||"neutral";h+=`<li><span class="meta">Q${i+1}</span> ${esc(q)} <span class="${l}">${SYM[l]}</span></li>`});
+  h+=`</ol><h3>Turn 2: result page, ${run.o.length} opened</h3>`;
+  run.page.forEach((x,k)=>{const it=D.items[x.p]||{};const c=it.g||[0,0,0];const oi=run.o.indexOf(x.p);const only=!otherP.has(x.p);
+    const tags=[it.s,it.d,x.f?`found by Q${(x.qi??0)+1}`:"padding"].filter(Boolean).map(esc);
+    if(oi>=0)tags.push("opened"+(run.ok[oi]===false?" (snippet only)":run.ok[oi]?" (full article)":""));
+    if(only)tags.push("only here");
+    h+=`<div class="item${oi>=0?" open":""}${only?" only":""}"><span class="meta">${k+1}. (${x.r+1})</span> <a href="${/^https?:\/\//i.test(it.u)?esc(it.u):"#"}" target="_blank" rel="noopener">${esc(it.h)}</a>`;
+    h+=`<div class="meta">${tags.join(" · ")} · <span class="${dir(c)}">${c[0]}▲ ${c[1]}▼ ${c[2]}•</span></div>${it.x?`<div class="meta">Snippet omitted (scraped page boilerplate).</div>`:`<div>${esc(it.sn)}</div>`}</div>`});
+  h+=`<h3>Turn 3: memo</h3><p class="memo">${esc(run.memo)}</p>`;
+  const onlyHere=run.page.filter(x=>!otherP.has(x.p)).length;
+  h+=`<p class="meta">${onlyHere} of ${run.page.length} results not on the other side; opened sets ${run.o.slice().sort().join()===other.o.slice().sort().join()?"identical":"differ"}.</p>`;
+  el.innerHTML=h}
+$("model").onchange=()=>{push({model:$("model").value});render()};
+$("ex").onchange=()=>{push({model:$("model").value,ex:$("ex").value});render()};
+boot();
+</script>
+</body>
+</html>

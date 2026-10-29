@@ -117,7 +117,7 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 <details>
 <summary>Setup</summary>
 <ul>
-  <li><strong>Data.</strong> FAR-Trans (CC BY 4.0): buys and sells of a European bank's retail customers, 2018–2022, with daily closes. Holdings are rebuilt from the transactions, valued at the last close before the purchase day, and include funds and bonds.</li>
+  <li><strong>Data.</strong> FAR-Trans (CC BY 4.0): buys and sells of a European bank's retail customers, 2018–2022, with daily closes. Holdings are rebuilt from the transactions, valued at the last close before the purchase day, and include funds and bonds. The closes are not adjusted for corporate actions, so a daily move beyond the Athens Exchange's ±30% limit (e.g. Attica Bank's 2021 rights issues) counts as no change, and price histories are back-adjusted the same way.</li>
   <li><strong>Taste.</strong> WMF trained on purchases before 2022-02-09; the 94 Athens-listed stocks the customer does not hold are ranked by its score.</li>
   <li><strong>Risk.</strong> Ledoit–Wolf covariance of the 250 daily log returns before the purchase day. Adding a stock at weight a changes the portfolio variance to (1−a)²σ²<sub>P</sub> + 2a(1−a)σ<sub>P,i</sub> + a²σ²<sub>i</sub>; the default weight is 1/(n+1) for n holdings.</li>
   <li><strong>Gate.</strong> The top-5 list may only change for clear gains: a stock ranked 6–10 by taste can enter if it cuts predicted volatility by at least 2%, replacing one that does not. The hedging partner is the list's most risk-reducing stock other than the CF favourite.</li>
@@ -256,18 +256,22 @@ function explain(){const t=C.top1,h=C.hedge,v0=Math.sqrt(C.var),a=pct(C.alpha,0)
 function panel(){const t=C.top1,h=C.hedge,b=C.bought,v0=Math.sqrt(C.var);
   const norm=v=>{const f=ffill(v),s=f.find(x=>x!=null);return f.map(x=>x==null?null:x/s*100)};
   const S=[["현재 포트폴리오","#2d63e0",C.port.map(x=>x*100)],["헤징 파트너","#20a698",norm(h.px)],["Top-1 추천","#9aa6bd",norm(t.px)]];
-  const all=S.flatMap(s=>s[2]).filter(x=>x!=null),lo=Math.min(...all),hi=Math.max(...all),W=560,H=210,L=40,T=10,B=22,n=C.port.length;
-  const y=v=>T+(hi-v)/(hi-lo)*(H-T-B),x=i=>L+i/(n-1)*(W-L-6);
-  let g="";for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v.toFixed(0)}</text>`}
+  // axis fitted to the portfolio and the partner; a Top-1 line beyond it is clipped (its 1-year change is in the legend)
+  const core=S.slice(0,2).flatMap(s=>s[2]).filter(x=>x>0),lo=Math.log(Math.min(...core)),hi=Math.log(Math.max(...core)),W=560,H=210,L=40,T=10,B=22,n=C.port.length;
+  const y=v=>T+(hi-Math.log(v))/(hi-lo||1)*(H-T-B),x=i=>L+i/(n-1)*(W-L-6);
+  const t1=S[2][2].filter(x=>x>0),clipped=Math.log(Math.min(...t1))<lo-1e-9||Math.log(Math.max(...t1))>hi+1e-9;
+  const chg=v=>{const f=v.filter(x=>x>0);return sp(f[f.length-1]/f[0]-1,0)};
+  let g="";for(let k=0;k<=4;k++){const v=Math.exp(lo+(hi-lo)*k/4);g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v>=10?v.toFixed(0):v.toPrecision(2)}</text>`}
   g+=`<text x="${L}" y="${H-4}">1년 전</text><text x="${W-6}" y="${H-4}" text-anchor="end">매수 전날</text>`;
-  for(const[,c,v]of S)g+=`<path d="${v.map((q,i)=>q==null?"":(i&&v[i-1]!=null?"L":"M")+x(i).toFixed(1)+" "+y(q).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  g+=`<clipPath id="plot"><rect x="${L}" y="${T}" width="${W-L}" height="${H-T-B}"/></clipPath>`;
+  for(const[,c,v]of S.slice().reverse())g+=`<path clip-path="url(#plot)" d="${v.map((q,i)=>q==null?"":(i&&v[i-1]!=null?"L":"M")+x(i).toFixed(1)+" "+y(q).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/>`;
   $("panel").innerHTML=`<h2>상세 분석</h2>
   <p class="meta">${esc(C.level)} 고객${C.capacity?` (투자 여력 ${esc(C.capacity)})`:""}, ${esc(C.date)} 매수 직전 실제 보유 ${C.holdings.length}개 자산 · 예상 연 변동성 ${pct(v0)}</p>
   <div class="tw"><table><thead><tr><th>보유 자산</th><th>유형</th><th class="n">비중</th><th class="n">파트너와 상관</th></tr></thead><tbody>
   ${C.holdings.map(x=>`<tr><td>${esc(x.name)}</td><td>${KIND[x.kind]||esc(x.kind)}</td><td class="n">${pct(x.w)}</td><td class="n">${x.corr==null?"–":x.corr.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>
-  <h3>지난 1년 움직임 (매수 1년 전 = 100)</h3>
+  <h3>지난 1년 움직임 (매수 1년 전 = 100, 로그 축)</h3>
   <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="현재 포트폴리오, 헤징 파트너, Top-1 추천의 지난 1년 가격 지수">${g}</svg>
-  <div class="legend">${S.map(([l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}</div>
+  <div class="legend">${S.map(([l,c,v],k)=>`<span><i style="background:${c}"></i>${l} ${chg(v)}${k===2&&clipped?" (일부 축 밖)":""}</span>`).join("")}</div>
   <h3>후보 비교 (${pct(C.alpha,0)} 편입 기준)</h3>
   <div class="tw"><table><thead><tr><th></th><th>종목</th><th class="n">선호 순위</th><th class="n">예상 위험</th><th class="n">포트폴리오와 상관</th></tr></thead><tbody>
   ${[["Top-1 추천",t],["헤징 파트너",h],["실제 구매",b]].map(([l,a])=>`<tr><td>${l}</td><td>${esc(a.name)}</td><td class="n">${a.rank?a.rank+"위":"–"}</td><td class="n">${a.rel==null?"–":sp(a.rel)}</td><td class="n">${a.corr==null?"–":a.corr.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>

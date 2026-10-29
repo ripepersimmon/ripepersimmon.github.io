@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hedging-Partner Recommender · Sahong Park</title>
+<meta name="description" content="A stock recommender that keeps the investor's taste but prefers the stocks that lower the risk of what they already hold. Real FAR-Trans examples on a mock app screen.">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="stylesheet" href="../../style.css">
+<style>
+h1 { font-size: 1.6em; margin: 0 0 0.6em; }
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6em 1.2em; margin: 1.5em 0 1.5em; }
+.controls label { display: flex; flex-direction: column; font-size: 0.85em; color: var(--muted); }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--muted); border-radius: 3px; padding: 0.15em 0.3em; max-width: 26em; }
+.wrap { display: grid; grid-template-columns: 410px 1fr; gap: 2.5em; align-items: start; }
+.panel { min-width: 0; scroll-margin-top: 72px; }
+.panel h2 { font-size: 1.15em; }
+.panel h3 { font-size: 1em; margin: 1.6em 0 0.5em; }
+.panel.flash { animation: flash 1.2s; }
+@keyframes flash { 0%, 40% { background: color-mix(in srgb, var(--link) 15%, transparent); } }
+.panel table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+.panel th, .panel td { text-align: left; padding: 0.35em 0.5em; border-bottom: 1px solid var(--border); }
+.panel th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.panel td.n, .panel th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.3em 1.2em; font-size: 0.85em; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35em; vertical-align: -1px; }
+.panel svg text { fill: var(--muted); font-size: 11px; }
+.panel svg .grid { stroke: var(--border); }
+
+/* Mock app screen: always light, like a phone screenshot */
+.phone { width: 410px; padding: 12px; border-radius: 58px; background: #1c1d21; box-shadow: 0 0 0 2px #3a3b40, 0 20px 50px rgba(20, 30, 60, .18); }
+.screen { position: relative; border-radius: 46px; overflow: hidden; background: #f4f7fc; color: #191c22; padding: 0 16px 14px;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", -apple-system, sans-serif; letter-spacing: -0.01em; line-height: 1.45; }
+.screen * { margin: 0; }
+.sb { display: flex; justify-content: space-between; align-items: center; height: 50px; padding: 0 18px 0 22px; font-weight: 600; font-size: 15px; }
+.island { position: absolute; left: 50%; top: 11px; width: 112px; height: 32px; margin-left: -56px; border-radius: 20px; background: #0b0b0d; }
+.top { position: relative; text-align: center; font-size: 19px; font-weight: 700; padding: 6px 0 10px; }
+.top .back { position: absolute; left: 0; top: 8px; width: 24px; height: 24px; }
+.chipbar { display: flex; justify-content: center; margin-bottom: 12px; }
+.prof { display: inline-flex; align-items: center; gap: 8px; background: #e4ecfb; color: #2a3550; border-radius: 22px; padding: 6px 14px; font-size: 14px; }
+.prof b { font-weight: 700; }
+.card { background: #fff; border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(25, 40, 80, .06), 0 0 0 1px #e9eef6; }
+.card.hedge { background: linear-gradient(180deg, #f2fbf9, #fff 60%); box-shadow: 0 1px 2px rgba(25, 40, 80, .06), 0 0 0 1px #dcefeb; }
+.ch { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.ct { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 16px; color: #1b4fd1; }
+.hedge .ct { color: #0e8b80; }
+.ct svg { width: 20px; height: 20px; }
+.pill { font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 14px; white-space: nowrap; }
+.pill.up { background: #fde8e8; color: #d6303a; }
+.pill.dn { background: #dcf3ef; color: #0e8b80; }
+.asset { display: flex; gap: 12px; align-items: flex-start; }
+.ic { flex: none; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: #2d63e0; box-shadow: 0 0 0 6px #e3ebfc; }
+.hedge .ic { background: #138f84; box-shadow: 0 0 0 6px #d8f0ec; }
+.ic svg { width: 26px; height: 26px; fill: #fff; }
+.code { font-size: 12px; color: #7a8394; }
+.nm { font-size: 19px; font-weight: 800; line-height: 1.25; word-break: break-word; }
+.sub { font-size: 13px; color: #2d63e0; margin-top: 2px; }
+.hedge .sub { color: #4f5a6b; }
+.px { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+.px b { font-size: 21px; font-weight: 800; }
+.px span { font-size: 13px; font-weight: 600; }
+.r { color: #d6303a; } .b { color: #2d63e0; } .g { color: #0e8b80; }
+.spark { position: relative; margin-top: 10px; }
+.spark svg { display: block; width: 100%; height: 76px; }
+.spark .pill { position: absolute; right: 0; top: -4px; }
+.tabs { display: flex; gap: 4px; margin-top: 6px; }
+.tabs button { flex: 1; border: 0; background: none; font: inherit; font-size: 12.5px; color: #7a8394; padding: 4px 0; border-radius: 9px; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: #e4ecfb; color: #1b4fd1; font-weight: 700; }
+.warn { margin-top: 12px; font-size: 13px; background: #fff4f4; color: #b4232c; border-radius: 12px; padding: 8px 10px; }
+.mix { background: #eef4f8; border-radius: 14px; padding: 12px; margin-top: 14px; }
+.mix .row { display: flex; align-items: center; gap: 12px; }
+.mix .lab { font-size: 12.5px; color: #4f5a6b; }
+.mix .big { font-size: 24px; font-weight: 800; color: #1b4fd1; line-height: 1.1; white-space: nowrap; }
+.bar { display: flex; height: 26px; border-radius: 9px; overflow: hidden; font-size: 12.5px; font-weight: 700; color: #fff; flex: 1; }
+.bar div { display: grid; place-items: center; min-width: 0; overflow: hidden; transition: width .15s; }
+.mix input { width: 100%; margin: 12px 0 4px; accent-color: #138f84; }
+.mix .out { font-size: 13px; color: #2a3550; }
+.mix .out b { font-weight: 800; }
+.chart svg { display: block; width: 100%; }
+.chart text { font-size: 11px; fill: #7a8394; }
+.chart .lbl { font-size: 11.5px; font-weight: 700; fill: #2a3550; }
+.note { font-size: 11px; color: #7a8394; display: flex; align-items: center; gap: 4px; }
+.lg { display: flex; justify-content: center; gap: 14px; font-size: 12px; color: #4f5a6b; margin-top: 4px; }
+.lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.txt { font-size: 13.5px; color: #353b47; }
+.txt p + p { margin-top: 8px; }
+.btns { display: flex; gap: 10px; margin-top: 4px; }
+.btns button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 54px; border-radius: 16px; font: inherit; font-size: 15.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.btns .pri { background: #1b56d6; color: #fff; border: 0; }
+.btns .sec { background: #fff; color: #1b2440; border: 1px solid #dfe5ef; }
+.btns svg { width: 20px; height: 20px; }
+.home { width: 134px; height: 5px; border-radius: 3px; background: #191c22; margin: 14px auto 0; }
+.toast { position: absolute; left: 16px; right: 16px; bottom: 96px; background: rgba(25, 28, 34, .92); color: #fff; font-size: 13px; border-radius: 14px; padding: 10px 14px; opacity: 0; transform: translateY(8px); transition: .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: none; }
+
+@media (max-width: 960px) { .wrap { grid-template-columns: 1fr; } .phone { margin: 0 auto; } }
+@media (max-width: 460px) {
+  .phone { width: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; margin: 0 -16px; }
+  .screen { border-radius: 0; padding-top: 8px; }
+  .sb, .island, .home { display: none; }
+  .btns button { font-size: 14px; gap: 6px; }
+}
+.tw { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="masthead"><div class="inner">
+  <a class="site" href="../../">Sahong Park</a>
+  <nav><a href="../" aria-current="true">Demo</a><button id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">◐</button></nav>
+</div></div>
+
+<main class="page">
+<h1>Hedging-Partner Recommender</h1>
+<p>A stock recommender that keeps the investor's taste but, among the stocks they would plausibly buy, prefers the ones that lower the risk of the portfolio they already hold. Each example is a real purchase from the <a href="https://doi.org/10.48550/arXiv.2407.08692">FAR-Trans</a> dataset: the customer's actual holdings on the day before, the collaborative-filtering (CF) favourite, and the <em>hedging partner</em> our risk gate picks from the same top list. Class project for Deep Learning Recommender Systems (HUFS, fall 2026).</p>
+<details>
+<summary>Setup</summary>
+<ul>
+  <li><strong>Data.</strong> FAR-Trans (CC BY 4.0): buys and sells of a European bank's retail customers, 2018–2022, with daily closes. Holdings are rebuilt from the transactions, valued at the last close before the purchase day, and include funds and bonds.</li>
+  <li><strong>Taste.</strong> WMF trained on purchases before 2022-02-09; the 94 Athens-listed stocks the customer does not hold are ranked by its score.</li>
+  <li><strong>Risk.</strong> Ledoit–Wolf covariance of the 250 daily log returns before the purchase day. Adding a stock at weight a changes the portfolio variance to (1−a)²σ²<sub>P</sub> + 2a(1−a)σ<sub>P,i</sub> + a²σ²<sub>i</sub>; the default weight is 1/(n+1) for n holdings.</li>
+  <li><strong>Gate.</strong> The top-5 list may only change for clear gains: a stock ranked 6–10 by taste can enter if it cuts predicted volatility by at least 2%, replacing one that does not. The hedging partner is the list's most risk-reducing stock other than the CF favourite.</li>
+  <li><strong>Check.</strong> “기간별 리스크 변화” is realized, not predicted: the volatility over the following trading days with the stock added at the same weight, against holding nothing new.</li>
+  <li><strong>Examples.</strong> Selected, not representative: test purchases (May–Sep 2022) by customers with 3–8 priced holdings where the CF favourite would raise predicted risk and the partner cuts it by 5%+, the three largest gaps per MiFID risk level. <span id="summary"></span></li>
+</ul>
+<p class="meta">Research artefact; not investment advice. Prices in euro.</p>
+</details>
+
+<div class="controls">
+  <label>Example <select id="ex"></select></label>
+  <span id="status" class="meta"></span>
+</div>
+
+<div class="wrap">
+  <div class="phone"><div class="screen" id="screen"></div></div>
+  <section class="panel" id="panel"></section>
+</div>
+</main>
+
+<footer class="footer">© 2026 Sahong Park · <a href="https://github.com/ripepersimmon">GitHub</a> · <a href="../../cv.pdf">CV</a></footer>
+
+<script>
+document.getElementById('theme-toggle').onclick=function(){
+  var r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme);}catch(e){}
+};
+
+let D,C,tab=21,wt;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct=(x,d=1)=>(x*100).toFixed(d)+"%";
+const sp=(x,d=1)=>(x>0?"+":x<0?"−":"")+Math.abs(x*100).toFixed(d)+"%";
+const eur=x=>"€"+x.toLocaleString("en",{minimumFractionDigits:x<1?3:2,maximumFractionDigits:x<1?4:2});
+const KIND={Stock:"주식",Bond:"채권",MTF:"펀드"};
+const TABS=[["1주",5],["1개월",21],["3개월",63],["1년",250]];
+const I={
+  back:'<path d="M15 5l-7 7 7 7" fill="none" stroke="#191c22" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  user:'<circle cx="12" cy="8" r="4.2" fill="#3d63c9"/><path d="M3.5 21c.8-4.4 4.2-7 8.5-7s7.7 2.6 8.5 7z" fill="#3d63c9"/>',
+  crown:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/>',
+  shield:'<path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z" fill="currentColor"/><path d="M8 12l3 3 5-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  bars:'<path d="M4 20V11h3.5v9zm6.25 0V5h3.5v15zM16.5 20v-6H20v6z" fill="currentColor"/>',
+  bank:'<path d="M12 2L2 7v2h20V7zM4 11v7h3v-7zm6.5 0v7h3v-7zM17 11v7h3v-7zM2 20h20v2H2z"/>',
+  doc:'<path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5M9 12h8M9 16h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  bag:'<path d="M9 4h6a1 1 0 0 1 1 1v2h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4V5a1 1 0 0 1 1-1zm1 3h4V6h-4zM3 12h18v1.5H3z" fill="currentColor"/>',
+  info:'<circle cx="12" cy="12" r="10" fill="#9aa3b2"/><path d="M12 10.5v6M12 7.2v.1" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>'};
+const svg=(k,cls="")=>`<svg viewBox="0 0 24 24" class="${cls}" aria-hidden="true">${I[k]}</svg>`;
+function status(t){$("status").textContent=t||""}
+async function boot(){try{status("loading …");const r=await fetch("data.json");if(!r.ok)throw new Error("data.json → HTTP "+r.status);D=await r.json();status("");
+  const s=D.summary;$("summary").textContent=`Across all ${s.cases.toLocaleString("en")} test purchases with a hedging partner, adding it at the default weight lowered realized one-month volatility in ${pct(s.hedge_cut,0)} of cases (median ${sp(s.hedge_med)}), against ${pct(s.top1_cut,0)} (median ${sp(s.top1_med)}) for the CF favourite.`;
+  const sel=$("ex");D.cases.forEach((c,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${c.level} · ${c.date} · 보유 ${c.holdings.length}종목`;sel.appendChild(o)});
+  const i=+new URLSearchParams(location.search).get("ex");sel.value=D.cases[i]?i:0;render()}catch(e){status("failed: "+e.message)}}
+
+// portfolio volatility after adding asset x at weight a
+const vol=(x,a)=>Math.sqrt((1-a)**2*C.var+2*a*(1-a)*x.cov+a*a*x.var);
+const astar=x=>Math.min(1,Math.max(0,(C.var-x.cov)/(C.var+x.var-2*x.cov)));
+const ffill=v=>{let l=null;return v.map(x=>x==null?l:(l=x))};
+
+function render(){C=D.cases[+$("ex").value];history.replaceState(null,"","?ex="+$("ex").value);wt=Math.round(C.alpha*100);
+  const t=C.top1,h=C.hedge,v0=Math.sqrt(C.var);
+  $("screen").innerHTML=`
+  <div class="sb"><span>9:41</span><svg width="70" height="13" viewBox="0 0 70 13" aria-hidden="true"><path d="M1 9h3v4H1zm5-2h3v6H6zm5-3h3v9h-3zm5-3h3v12h-3z" fill="#191c22"/><path d="M33 4.5a10 10 0 0 1 14 0l-1.6 1.6a7.7 7.7 0 0 0-10.8 0zm3.2 3.2a5.5 5.5 0 0 1 7.6 0L40 11.5z" fill="#191c22"/><rect x="51" y="1" width="16" height="11" rx="3" fill="none" stroke="#191c22" stroke-opacity=".4"/><rect x="52.6" y="2.6" width="12.8" height="7.8" rx="1.8" fill="#191c22"/><path d="M68.5 4.5v4" stroke="#191c22" stroke-opacity=".4" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div class="island"></div>
+  <div class="top"><svg class="back" viewBox="0 0 24 24" aria-hidden="true">${I.back}</svg>맞춤 자산 추천</div>
+  <div class="chipbar"><span class="prof">${svg("user").replace("<svg",'<svg width="20" height="20"')} 투자 성향: <b>${esc(C.level)}</b> · ${esc(C.date)} 기준</span></div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">${svg("crown")}Top-1 추천 자산</span><span class="pill up">예상 위험 ${sp(t.rel)}</span></div>
+    <div class="asset"><div class="ic">${svg("bars")}</div><div style="min-width:0;flex:1">
+      <div class="code">${esc(t.isin)}</div><div class="nm">${esc(t.name)}</div>
+      <div class="sub">선호 순위 1위${t.sector?" · "+esc(t.sector):""}</div>
+      <div class="px"><b>${eur(t.price)}</b><span class="${t.chg>0?"r":t.chg<0?"b":""}">${t.chg>0?"▲":t.chg<0?"▼":"–"} ${sp(t.chg)}</span></div>
+    </div></div>
+    <div class="spark" id="spark"></div>
+    <div class="tabs" id="tabs">${TABS.map(([l,n])=>`<button data-n="${n}" aria-pressed="${n===tab}">${l}</button>`).join("")}</div>
+    <div class="warn">지금 포트폴리오에 ${pct(C.alpha,0)} 비중으로 담으면 연 변동성이 ${pct(v0)} → ${pct(vol(t,C.alpha))}로 커질 것으로 예상돼요.</div>
+  </div>
+
+  <div class="card hedge">
+    <div class="ch"><span class="ct">${svg("shield")}헤징 파트너</span><span class="pill dn">예상 위험 ${sp(h.rel)}</span></div>
+    <div class="asset"><div class="ic">${svg("bank")}</div><div style="min-width:0;flex:1">
+      <div class="code">${esc(h.isin)}</div><div class="nm">${esc(h.name)}</div>
+      <div class="sub">선호 순위 ${h.rank}위${h.sector?" · "+esc(h.sector):""}<br>지금 보유 자산과 함께 담으면 변동성 완화 기대</div>
+    </div></div>
+    <div class="mix">
+      <div class="row"><div><div class="lab">권장 비중</div><div class="big" id="ratio"></div></div>
+        <div style="flex:1"><div class="bar"><div id="b0" style="background:#2d63e0"></div><div id="b1" style="background:#20a698"></div></div>
+        <div class="lab" style="display:flex;justify-content:space-between;margin-top:4px"><span>● 기존 보유</span><span class="g">● 헤징 파트너</span></div></div></div>
+      <input type="range" id="wt" min="0" max="50" step="1" value="${wt}" aria-label="헤징 파트너 비중">
+      <div class="out" id="out"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">${svg("bars")}기간별 리스크 변화</span><span class="note">${svg("info").replace("<svg",'<svg width="13" height="13"')}사후 검증</span></div>
+    <div class="chart" id="bars"></div>
+    <div class="lg"><span><i style="background:#20a698"></i>헤징 파트너</span><span><i style="background:#aab8d6"></i>Top-1 추천</span></div>
+    <div class="note" style="justify-content:center;margin-top:6px">기준: ${pct(C.alpha,0)} 편입 시 실현 변동성 변화 (담지 않았을 때 대비)</div>
+  </div>
+
+  <div class="card"><div class="ch"><span class="ct">${svg("doc")}추천 해설</span></div><div class="txt">${explain()}</div></div>
+
+  <div class="btns"><button class="pri" id="add">${svg("bag")}포트폴리오로 담기</button><button class="sec" id="more">${svg("bars")}상세 분석 보기</button></div>
+  <div class="home"></div><div class="toast" id="toast"></div>`;
+  $("tabs").onclick=e=>{const n=+e.target.dataset.n;if(n){tab=n;spark();$("tabs").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.n===n))}};
+  $("wt").oninput=e=>{wt=+e.target.value;mix()};
+  $("add").onclick=()=>{const T=$("toast");T.textContent=`데모예요. 실제 주문은 나가지 않아요 · ${esc(h.name)} ${wt}% 편입 시 예상 연 변동성 ${pct(vol(h,wt/100))}`;T.classList.add("on");clearTimeout(T.t);T.t=setTimeout(()=>T.classList.remove("on"),2600)};
+  $("more").onclick=()=>{const P=$("panel");P.scrollIntoView({behavior:"smooth",block:"start"});P.classList.remove("flash");void P.offsetWidth;P.classList.add("flash")};
+  spark();mix();bars();panel()}
+
+function spark(){const p=ffill(C.top1.px).slice(-tab-1).filter(x=>x!=null),lo=Math.min(...p),hi=Math.max(...p),W=300,H=76;
+  const xy=p.map((v,i)=>[i/(p.length-1)*W,H-4-(hi>lo?(v-lo)/(hi-lo):.5)*(H-14)]),d=xy.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)).join(""),ch=p[p.length-1]/p[0]-1;
+  $("spark").innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="가격 추이"><defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d63e0" stop-opacity=".22"/><stop offset="1" stop-color="#2d63e0" stop-opacity="0"/></linearGradient></defs>
+  <path d="${d}L${W} ${H}L0 ${H}Z" fill="url(#gf)"/><path d="${d}" fill="none" stroke="#2d63e0" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+  <span class="pill ${ch>=0?"up":"dn"}" style="${ch<0?"background:#e4ecfb;color:#2d63e0":""}">${sp(ch)}</span>`}
+
+function mix(){const h=C.hedge,a=wt/100,v0=Math.sqrt(C.var),v=vol(h,a),as=astar(h);
+  $("ratio").textContent=`${100-wt} : ${wt}`;$("b0").style.width=(100-wt)+"%";$("b1").style.width=wt+"%";$("b0").textContent=wt<90?(100-wt)+"%":"";$("b1").textContent=wt>=12?wt+"%":"";
+  $("out").innerHTML=`연 변동성 ${pct(v0)} → <b class="${v<v0?"g":"r"}">${pct(v)}</b> (${sp(v/v0-1)})<br><span class="lab">위험이 가장 낮아지는 비중은 약 ${pct(as,0)} (${sp(vol(h,as)/v0-1)})${wt===Math.round(C.alpha*100)?" · 기본 비중 1/(n+1)":""}</span>`}
+
+function bars(){const Hz=D.meta.horizons,S=[["#20a698",C.hedge.real],["#aab8d6",C.top1.real]];
+  const vals=S.flatMap(s=>s[1]).filter(x=>x!=null).map(x=>-x*100),m=Math.max(10,Math.ceil(Math.max(...vals.map(Math.abs))*1.15/10)*10);
+  const W=330,H=170,L=34,T=18,B=24,y=v=>T+(m-v)/(2*m)*(H-T-B),gw=(W-L)/Hz.length,bw=Math.min(26,gw/3.2);
+  let g="";for(const v of [m,m/2,0,-m/2,-m])g+=`<line x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${v?"#edf1f7":"#c5ccd8"}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v>0?"−":v<0?"+":""}${Math.abs(v)}%</text>`;
+  Hz.forEach((hz,k)=>{const cx=L+gw*(k+.5);S.forEach(([c,r],j)=>{const x=r[k];if(x==null)return;const v=-x*100,bx=cx+(j?4:-bw-4);
+    g+=`<rect x="${bx}" y="${Math.min(y(v),y(0))}" width="${bw}" height="${Math.max(1,Math.abs(y(v)-y(0)))}" rx="4" fill="${v<0&&!j?"#f0a3a8":c}"/>`;
+    g+=`<text class="lbl" x="${bx+bw/2}" y="${v>=0?y(v)-5:y(v)+13}" text-anchor="middle" style="font-size:9.5px">${sp(x,0)}</text>`});
+    g+=`<text x="${cx}" y="${H-6}" text-anchor="middle" style="font-size:12px">${hz}</text>`});
+  $("bars").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="기간별 실현 변동성 변화. 위쪽이 위험 감소">${g}<text x="${L}" y="10" style="font-size:10.5px">↑ 위험 감소</text></svg>`}
+
+function explain(){const t=C.top1,h=C.hedge,v0=Math.sqrt(C.var),a=pct(C.alpha,0),hs=C.holdings.filter(x=>x.corr!=null),j=hs.reduce((m,x)=>x.corr<m.corr?x:m,hs[0]||{}),r=h.real[1];
+  return `<p>취향에 가장 가까운 종목은 ${esc(t.name)}입니다. 다만 지금 포트폴리오에 ${a} 비중으로 담으면 연 변동성이 ${pct(v0)}에서 ${pct(vol(t,C.alpha))}로 약 ${pct(Math.abs(t.rel),0)} 커질 것으로 예상됩니다.</p>
+  <p>같은 비중으로 추천 목록 ${h.rank}위 ${esc(h.name)} 종목을 담으면 변동성은 ${pct(vol(h,C.alpha))}로 약 ${pct(Math.abs(h.rel),0)} 낮아집니다. 지금 포트폴리오와의 상관계수가 ${h.corr.toFixed(2)}로 낮기 때문이며${j.name?`, 보유 자산 중에서는 ${esc(j.name)} 종목과의 상관이 ${j.corr.toFixed(2)}로 가장 낮습니다`:""}.</p>
+  ${r!=null?`<p>사후 확인: 이후 1개월 동안 실제 변동성은 담지 않았을 때보다 ${pct(Math.abs(r),0)} ${r<0?"낮았":"높았"}습니다.</p>`:""}`}
+
+function panel(){const t=C.top1,h=C.hedge,b=C.bought,v0=Math.sqrt(C.var);
+  const norm=v=>{const f=ffill(v),s=f.find(x=>x!=null);return f.map(x=>x==null?null:x/s*100)};
+  const S=[["현재 포트폴리오","#2d63e0",C.port.map(x=>x*100)],["헤징 파트너","#20a698",norm(h.px)],["Top-1 추천","#9aa6bd",norm(t.px)]];
+  const all=S.flatMap(s=>s[2]).filter(x=>x!=null),lo=Math.min(...all),hi=Math.max(...all),W=560,H=210,L=40,T=10,B=22,n=C.port.length;
+  const y=v=>T+(hi-v)/(hi-lo)*(H-T-B),x=i=>L+i/(n-1)*(W-L-6);
+  let g="";for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v.toFixed(0)}</text>`}
+  g+=`<text x="${L}" y="${H-4}">1년 전</text><text x="${W-6}" y="${H-4}" text-anchor="end">매수 전날</text>`;
+  for(const[,c,v]of S)g+=`<path d="${v.map((q,i)=>q==null?"":(i&&v[i-1]!=null?"L":"M")+x(i).toFixed(1)+" "+y(q).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  $("panel").innerHTML=`<h2>상세 분석</h2>
+  <p class="meta">${esc(C.level)} 고객${C.capacity?` (투자 여력 ${esc(C.capacity)})`:""}, ${esc(C.date)} 매수 직전 실제 보유 ${C.holdings.length}개 자산 · 예상 연 변동성 ${pct(v0)}</p>
+  <div class="tw"><table><thead><tr><th>보유 자산</th><th>유형</th><th class="n">비중</th><th class="n">파트너와 상관</th></tr></thead><tbody>
+  ${C.holdings.map(x=>`<tr><td>${esc(x.name)}</td><td>${KIND[x.kind]||esc(x.kind)}</td><td class="n">${pct(x.w)}</td><td class="n">${x.corr==null?"–":x.corr.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>
+  <h3>지난 1년 움직임 (매수 1년 전 = 100)</h3>
+  <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="현재 포트폴리오, 헤징 파트너, Top-1 추천의 지난 1년 가격 지수">${g}</svg>
+  <div class="legend">${S.map(([l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}</div>
+  <h3>후보 비교 (${pct(C.alpha,0)} 편입 기준)</h3>
+  <div class="tw"><table><thead><tr><th></th><th>종목</th><th class="n">선호 순위</th><th class="n">예상 위험</th><th class="n">포트폴리오와 상관</th></tr></thead><tbody>
+  ${[["Top-1 추천",t],["헤징 파트너",h],["실제 구매",b]].map(([l,a])=>`<tr><td>${l}</td><td>${esc(a.name)}</td><td class="n">${a.rank?a.rank+"위":"–"}</td><td class="n">${a.rel==null?"–":sp(a.rel)}</td><td class="n">${a.corr==null?"–":a.corr.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>
+  <p class="meta" style="margin-top:1em">예상 위험: 기존 포트폴리오에 1/(n+1) 비중으로 더했을 때 예상 연 변동성의 변화 (Ledoit–Wolf, 직전 250거래일). 선호 순위: 보유하지 않은 94개 주식 중 WMF 점수 순위. 가격 정보가 멈춘 종목은 후보에서 빠집니다.</p>`}
+
+$("ex").onchange=render;
+boot();
+</script>
+</body>
+</html>

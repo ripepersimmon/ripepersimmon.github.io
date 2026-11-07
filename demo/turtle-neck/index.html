@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turtle-Neck Alert · Sahong Park</title>
+<meta name="description" content="A laptop-webcam alert for forward head posture, measured against your own calibrated posture. Runs entirely in the browser.">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="stylesheet" href="../../style.css">
+<style>
+:root { --ok: #2e7d32; --bad: #c62828; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ok: #81c784; --bad: #ef9a9a; }
+}
+:root[data-theme="dark"] { --ok: #81c784; --bad: #ef9a9a; }
+
+h1 { font-size: 1.6em; margin: 0 0 0.6em; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6em; margin: 1.5em 0 1em; }
+.controls button { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--muted); border-radius: 3px; padding: 0.3em 0.9em; cursor: pointer; }
+.controls button:disabled { opacity: 0.45; cursor: default; }
+#state { font-size: 1.15em; font-weight: 600; margin: 0 0 0.1em; }
+#state.ok { color: var(--ok); }
+#state.bad { color: var(--bad); }
+#info { min-height: 1.6em; }
+canvas { display: block; width: 100%; max-width: 640px; margin: 0.6em 0 1.5em; background: #000; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="masthead"><div class="inner">
+  <a class="site" href="../../">Sahong Park</a>
+  <nav><a href="../" aria-current="true">Demo</a><button id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">◐</button></nav>
+</div></div>
+
+<main class="page">
+<h1>Turtle-Neck Alert</h1>
+<p>Watches for forward head posture (“turtle neck”) with nothing but a laptop's front webcam. It first learns two postures from you, sitting comfortably and pushing your head forward, then alerts you when your neck stays near the second one for 10 seconds. It compares you only with yourself, so it is a reminder, not a diagnosis.</p>
+<p class="meta">Everything runs in your browser with MediaPipe. The video never leaves your device; only your calibration is saved, in this browser.</p>
+
+<div class="controls">
+  <button id="calib">1. Calibrate</button>
+  <button id="run">2. Start monitoring</button>
+  <button id="stop" disabled>Stop</button>
+</div>
+<div id="state" aria-live="polite"></div>
+<div id="info" class="meta"></div>
+<canvas id="view" width="640" height="480"></canvas>
+
+<details>
+<summary>How it works</summary>
+<ul>
+  <li><strong>Neck model.</strong> Pose Landmarker finds the shoulders; Face Landmarker fits a 3D face mesh and head pose. In camera coordinates the neck runs from the shoulder midpoint to the head center. Head depth comes from the face fit, torso depth from shoulder width scaled off your calibration. The indicator is how far that neck has tipped toward the screen, in degrees.</li>
+  <li><strong>Leaning in.</strong> Leaning in with the whole upper body moves head and shoulders together, so the angle barely changes; pushing only the head forward raises it.</li>
+  <li><strong>Pauses.</strong> No reading while the face or either shoulder is out of view, or while the head is turned more than 20° or tilted more than 10° from your calibration.</li>
+  <li><strong>Alert.</strong> Median of the last 15 readings, scaled so 0 is your relaxed posture and 1 your calibrated forward posture. Above 0.5 for 10 s gives a beep and a notification, at most once a minute.</li>
+  <li><strong>Limits.</strong> Assumes your head sits above your shoulders when you calibrate, so calibrating while already slouched makes the slouch your baseline. Rounded shoulders also read as head forward. Browsers slow down or pause background tabs, so keep this page visible, for example in a small window.</li>
+</ul>
+<p class="meta">Prototype; not a medical device.</p>
+</details>
+</main>
+
+<footer class="footer">© 2026 Sahong Park · <a href="https://github.com/ripepersimmon">GitHub</a> · <a href="../../cv.pdf">CV</a></footer>
+
+<script>
+document.getElementById('theme-toggle').onclick=function(){
+  var r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme);}catch(e){}
+};
+</script>
+<script type="module">
+// Browser port of posture.py (neck_angle indicator only).
+import { FilesetResolver, PoseLandmarker, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs";
+
+const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm";
+const MODELS = "https://storage.googleapis.com/mediapipe-models/";
+const FOV_V = 63, MIN_VIS = 0.5, MAX_YAW = 20, MAX_ROLL = 10, MIN_GAP = 3;
+const SMOOTH_N = 15, HOLD_SEC = 10, GAP_SEC = 2, COOLDOWN_SEC = 60, CALIB_SEC = 5;
+const L_SH = 11, R_SH = 12, F_SIDES = [234, 454];
+const OVAL = [...new Set(FaceLandmarker.FACE_LANDMARKS_FACE_OVAL.map(c => c.start))];
+const KEY = "turtle-neck-calib";
+
+const $ = id => document.getElementById(id);
+const cv = $("view"), ctx = cv.getContext("2d"), video = document.createElement("video");
+video.muted = video.playsInline = true;
+const deg = r => r * 180 / Math.PI;
+const median = xs => { const s = [...xs].sort((a, b) => a - b), n = s.length; return n % 2 ? s[n >> 1] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+const say = (s, cls = "") => { $("state").textContent = s; $("state").className = cls; };
+
+function features(lms, w, h, flms, m) {
+  if (Math.min(lms[L_SH].visibility ?? 0, lms[R_SH].visibility ?? 0) < MIN_VIS) return null;
+  const px = (...pts) => [pts.reduce((s, p) => s + p.x, 0) / pts.length * w, pts.reduce((s, p) => s + p.y, 0) / pts.length * h];
+  const [lx, ly] = px(lms[L_SH]), [rx, ry] = px(lms[R_SH]), shoulder_w = Math.hypot(lx - rx, ly - ry);
+  if (shoulder_w < 1) return null;
+  const M = (i, j) => m[j * 4 + i];                  // MediaPipe packs the 4x4 head pose column-major
+  const s = Math.hypot(M(0, 0), M(1, 0), M(2, 0));  // strip scale; camera axes: x right, y up, z toward viewer
+  const f_px = h / 2 / Math.tan(FOV_V / 2 * Math.PI / 180);
+  return {
+    shoulder_w,
+    head_z: -M(2, 3),                                                    // cm in front of the camera
+    head_yaw: deg(Math.asin(Math.max(-1, Math.min(1, -M(2, 0) / s)))),
+    head_roll: deg(Math.atan2(M(1, 0), M(0, 0))),
+    head_ray: (h / 2 - px(...F_SIDES.map(i => flms[i]))[1]) / f_px,     // head-center height / depth
+    sh_ray: (h / 2 - (ly + ry) / 2) / f_px,                               // shoulder-midpoint height / depth
+  };
+}
+
+// 3D neck vector [forward cm, up cm], shoulder midpoint -> head center. Torso depth = calibrated head depth
+// scaled by shoulder width, so the focal length cancels. Assumes head-over-shoulders at calibration.
+function neck3d(f, b) {
+  const z_t = b.head_z * b.shoulder_w / f.shoulder_w;
+  return [z_t - f.head_z, f.head_ray * f.head_z - f.sh_ray * z_t];
+}
+const neckAngle = (f, b) => { const [fwd, up] = neck3d(f, b); return deg(Math.atan2(fwd, up)); };
+
+function gate(f, b) {
+  if (!f) return "face or shoulders not in view";
+  if (Math.abs(f.head_yaw - b.head_yaw) > MAX_YAW) return "head turned";
+  if (Math.abs(f.head_roll - b.head_roll) > MAX_ROLL) return "head tilted";
+  return "";
+}
+
+function line(color, width, [x1, y1], [x2, y2]) {
+  ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+
+// Detect on the current video frame, draw it mirrored with the landmarks, return features or null.
+let pose, face, ts = 0;
+function frame() {
+  const w = video.videoWidth, h = video.videoHeight;
+  if (cv.width !== w || cv.height !== h) [cv.width, cv.height] = [w, h];
+  ts = Math.max(ts + 1, performance.now());  // must strictly increase
+  const pr = pose.detectForVideo(video, ts), fr = face.detectForVideo(video, ts);
+  const lms = pr.landmarks[0], flms = fr.faceLandmarks[0], m = fr.facialTransformationMatrixes?.[0]?.data;
+  ctx.setTransform(-1, 0, 0, 1, w, 0);
+  ctx.drawImage(video, 0, 0, w, h);
+  ctx.fillStyle = "#00c8ff";
+  if (flms) for (const i of OVAL) ctx.fillRect(flms[i].x * w - 1.5, flms[i].y * h - 1.5, 3, 3);
+  let f = null;
+  if (lms) {
+    const [a, b] = [L_SH, R_SH].map(i => [lms[i].x * w, lms[i].y * h]);
+    line("#00ff00", 2, a, b);
+    if (flms) {
+      const [c, d] = F_SIDES.map(i => [flms[i].x * w, flms[i].y * h]);
+      line("#00ff00", 2, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], [(c[0] + d[0]) / 2, (c[1] + d[1]) / 2]);
+      if (m) f = features(lms, w, h, flms, m);
+    }
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  return f;
+}
+
+// Side-view inset: gray = calibrated neutral neck, colored = now; the screen is to the right.
+function drawSide(fwd, up, up0, alarm) {
+  const w = cv.width, h = cv.height, k = 80 / up0, x0 = w - 75, y0 = h - 15, col = alarm ? "#ff4040" : "#40d040";
+  ctx.fillStyle = "rgba(30,30,30,0.85)"; ctx.fillRect(w - 150, h - 125, 145, 120);
+  ctx.fillStyle = "#ccc"; ctx.font = "11px sans-serif"; ctx.fillText("side view   screen →", w - 145, h - 110);
+  line("#888", 2, [x0, y0], [x0, y0 - up0 * k]);
+  const head = [x0 + fwd * k, y0 - up * k];
+  line(col, 3, [x0, y0], head);
+  ctx.beginPath(); ctx.arc(head[0], head[1], 9, 0, 2 * Math.PI); ctx.stroke();
+}
+
+let audio;
+function alertUser() {
+  const o = audio.createOscillator();
+  o.frequency.value = 880; o.connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.25);
+  try { if (Notification.permission === "granted") new Notification("Turtle-Neck Alert", { body: "Check your posture." }); } catch {}
+}
+
+function loadCalib() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
+
+function calibrate(t0) {
+  const phases = [["base", "Sit comfortably"], ["fwd", "Push your HEAD forward, shoulders still"]], got = { base: [], fwd: [] };
+  return (f, now) => {
+    const t = now - t0, i = Math.floor(t / (3 + CALIB_SEC)), tp = t % (3 + CALIB_SEC);
+    if (i < phases.length) {
+      const [key, prompt] = phases[i];
+      if (tp < 3) say(`${prompt}: starts in ${3 - Math.floor(tp)}`);
+      else { if (f) got[key].push(f); say(`${prompt}: recording (${got[key].length})`); }
+      $("info").textContent = f ? "" : "Face or shoulders not in view";
+      return true;
+    }
+    if (Math.min(got.base.length, got.fwd.length) < 10) {
+      say("Not enough usable frames. Keep your face and both shoulders in view, then calibrate again.", "bad");
+      return false;
+    }
+    const c = Object.fromEntries(Object.entries(got).map(([k, rows]) =>
+      [k, Object.fromEntries(Object.keys(rows[0]).map(n => [n, median(rows.map(r => r[n]))]))]));
+    const gap = neckAngle(c.fwd, c.base), fwd = neck3d(c.fwd, c.base)[0];
+    if (!(Math.abs(gap) >= MIN_GAP)) {  // also rejects NaN
+      say(`Pushing your head forward changed the neck angle by only ${gap.toFixed(1)}°. Calibrate again and push further.`, "bad");
+      return false;
+    }
+    try { localStorage.setItem(KEY, JSON.stringify(c)); } catch {}
+    say(`Calibrated: head forward = ${gap.toFixed(1)}°, ${fwd.toFixed(1)} cm. Press Start monitoring.`, "ok");
+    $("info").textContent = "";
+    calibrated = c;
+    return false;
+  };
+}
+
+function monitor(c) {
+  const base = c.base, cal = neckAngle(c.fwd, base), up0 = neck3d(base, base)[1], win = [];
+  let since = null, lastOk = -Infinity, lastAlert = -Infinity;
+  return (f, now) => {
+    let reason = gate(f, base);
+    const val = reason ? NaN : neckAngle(f, base);
+    if (!reason && Number.isNaN(val)) reason = "no reading";
+    if (reason) say(`Paused: ${reason}`);
+    else {
+      if (now - lastOk > GAP_SEC) { win.length = 0; since = null; }
+      lastOk = now;
+      win.push(val); if (win.length > SMOOTH_N) win.shift();
+      const score = median(win) / cal;  // 0 = your baseline, 1 = your calibrated "forward"
+      if (score > 0.5) {
+        since ??= now;
+        if (now - since >= HOLD_SEC && now - lastAlert >= COOLDOWN_SEC) { alertUser(); lastAlert = now; }
+        say(`Head forward for ${(now - since).toFixed(0)} s · score ${score.toFixed(2)}`, "bad");
+      } else { since = null; say(`OK · score ${score.toFixed(2)}`, "ok"); }
+    }
+    const [fwd, up] = f ? neck3d(f, base) : [NaN, NaN];
+    $("info").textContent = f ? `neck ${deg(Math.atan2(fwd, up)).toFixed(1)}°, head ${fwd.toFixed(1)} cm vs. calibration` : "";
+    if (up0 > 1 && Number.isFinite(fwd + up)) drawSide(fwd, up, up0, since !== null);
+    return true;
+  };
+}
+
+let calibrated = loadCalib(), step = null;
+function buttons() {
+  $("calib").disabled = !!step; $("run").disabled = !!step || !calibrated; $("stop").disabled = !step;
+}
+function stop() {
+  step = null;
+  video.srcObject?.getTracks().forEach(t => t.stop());
+  video.srcObject = null;
+  buttons();
+}
+async function start(make) {
+  const loading = step = () => true;
+  buttons();
+  try {
+    audio ??= new AudioContext();
+    if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+    if (!pose) {
+      say("Loading models…");
+      const fs = await FilesetResolver.forVisionTasks(WASM);
+      const opts = delegate => [
+        { baseOptions: { modelAssetPath: MODELS + "pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate }, runningMode: "VIDEO", numPoses: 1 },
+        { baseOptions: { modelAssetPath: MODELS + "face_landmarker/face_landmarker/float16/1/face_landmarker.task", delegate }, runningMode: "VIDEO", numFaces: 1, outputFacialTransformationMatrixes: true }];
+      const create = async d => { const [p, f] = opts(d); return [await PoseLandmarker.createFromOptions(fs, p), await FaceLandmarker.createFromOptions(fs, f)]; };
+      try { [pose, face] = await create("GPU"); } catch { [pose, face] = await create("CPU"); }
+    }
+    say("Starting camera…");
+    video.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" } });
+    await video.play();
+  } catch (e) {
+    say(`Could not start: ${e.message}`, "bad");
+    return stop();
+  }
+  if (step !== loading) { say("Stopped."); return stop(); }  // Stop was pressed while loading
+  const s = step = make(performance.now() / 1000);
+  (function tick() {
+    if (step !== s) return;
+    if (video.readyState >= 2 && !s(frame(), performance.now() / 1000)) return stop();
+    setTimeout(tick, 30);
+  })();
+}
+
+$("calib").onclick = () => start(calibrate);
+$("run").onclick = () => start(() => monitor(calibrated));
+$("stop").onclick = () => { stop(); say("Stopped."); $("info").textContent = ""; };
+say(calibrated ? "Calibration found. Press Start monitoring, or calibrate again." :
+  "Sit so your face and both shoulders are in view, then press Calibrate.");
+buttons();
+</script>
+</body>
+</html>
